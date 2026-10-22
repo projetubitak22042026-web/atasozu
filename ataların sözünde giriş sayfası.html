@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ataların Sözünde Maarifin İzinde - Atasözleri ve Değerleri Oyunu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bozkir: {
+                            950: '#0b1117',
+                            900: '#121d27',
+                            800: '#1c2d3d',
+                            700: '#284055'
+                        },
+                        turkuaz: {
+                            DEFAULT: '#0ea5b7',
+                            light: '#38d9ec',
+                            dark: '#087382'
+                        },
+                        otagKizil: {
+                            DEFAULT: '#c85a28',
+                            light: '#e07644',
+                            dark: '#8c3510'
+                        },
+                        amberGold: {
+                            DEFAULT: '#d4af37',
+                            light: '#f7e7a9',
+                            dark: '#9e7b16'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .pattern-bg {
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
+                radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #d97706 0%, #0ea5b7 100%);
+            background-size: 42px 42px, 42px 42px, 100% 100%;
+            background-position: 0 0, 21px 21px, 0 0;
+            background-attachment: fixed;
+        }
+
+        .gold-border {
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+        }
+
+        .turkuaz-border {
+            border: 1px solid rgba(14, 165, 183, 0.45);
+            box-shadow: 0 0 20px rgba(14, 165, 183, 0.12);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fff2a3 0%, #d4af37 50%, #c85a28 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-glass {
+            background: rgba(18, 29, 39, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        /* Kusursuz Dairesel Çerçeveler */
+        .circle-badge {
+            position: relative;
+            border-radius: 9999px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            background: transparent;
+            aspect-ratio: 1 / 1;
+        }
+
+        .circle-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 9999px;
+            transition: transform 0.5s ease;
+        }
+
+        .circle-badge:hover img {
+            transform: scale(1.12);
+        }
+
+        .circle-badge:hover {
+            transform: translateY(-8px) scale(1.05);
+        }
+    </style>
+</head>
+<body class="pattern-bg text-slate-100 font-sans min-h-screen flex flex-col selection:bg-amber-400 selection:text-bozkir-950">
+
+    <!-- Üst Gezinme / Header -->
+    <header class="w-full border-b border-amberGold/25 card-glass sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="playSound('click'); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-otagKizil via-amberGold to-turkuaz p-0.5 shadow-lg shadow-amberGold/20 flex items-center justify-center">
+                    <div class="w-full h-full bg-bozkir-900 rounded-full flex items-center justify-center text-amberGold">
+                        <i class="fa-solid fa-campground text-xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="font-serif tracking-wider font-bold text-sm sm:text-base text-amberGold-light block">ATALARIN SÖZÜNDE MAARİFİN İZİNDE</span>
+                    <span class="block text-[11px] text-turkuaz-light uppercase tracking-widest font-medium">Atasözleri ve Değerler Eğitimi</span>
+                </div>
+            </div>
+
+            <!-- Sağ Aksiyon Butonları -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button id="soundToggleBtn" onclick="toggleAudio()" class="p-2.5 rounded-xl border border-amberGold/30 text-amberGold hover:bg-amberGold/10 transition" title="Ses Aç/Kapat">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="openModal('howToPlayModal')" class="hidden sm:inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium border border-turkuaz/40 hover:border-turkuaz text-turkuaz-light hover:bg-turkuaz/10 transition">
+                    <i class="fa-regular fa-circle-question mr-2"></i> Nasıl Oynanır?
+                </button>
+                <button onclick="openModal('leaderboardModal')" class="p-2.5 sm:px-4 sm:py-2 rounded-xl text-sm font-medium border border-amberGold/30 hover:border-amberGold text-amberGold-light hover:bg-amberGold/10 transition">
+                    <i class="fa-solid fa-trophy sm:mr-2 text-amberGold"></i><span class="hidden sm:inline">Skor Tablosu</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col items-center">
+
+        <!-- Hero Bölümü -->
+        <section class="text-center max-w-4xl mb-12 sm:mb-16">
+            <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-otagKizil/20 to-turkuaz/20 border border-amberGold/40 text-amberGold-light text-xs font-semibold uppercase tracking-wider mb-5">
+                <i class="fa-solid fa-scroll text-amberGold"></i>
+                <span>Kadim Miras, Kök Değerler ve Bilgelik Maarifi</span>
+            </div>
+            
+            <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif font-black gold-gradient-text tracking-wide leading-tight mb-4 uppercase">
+                Ataların Sözünde<br>Maarifin İzinde
+            </h1>
+            <p class="text-base sm:text-xl text-turkuaz-light font-medium mb-3">
+                Atasözleri ve Kültürel Değerler Oyunu
+            </p>
+            <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light mb-8 max-w-2xl mx-auto">
+                Bozkırın derinliklerinden Dede Korkut'un hikmetine, otağların samimiyetinden at sırtındaki cesarete uzanan atasözlerimizi ve kök değerlerimizi oyunla keşfedin!
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#gameModes" onclick="playSound('click')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold text-lg shadow-xl shadow-amberGold/20 hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-3">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Maceraya Başla</span>
+                </a>
+                <a href="#kulturelMiras" onclick="playSound('click')" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass turkuaz-border text-turkuaz-light font-semibold text-base hover:bg-turkuaz/10 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-landmark text-turkuaz"></i>
+                    <span>Kültürel Değerleri Gör</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- KÜLTÜREL MİRAS VİTRİNİ -->
+        <section id="kulturelMiras" class="w-full mb-16">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-amberGold-light tracking-wide mb-2 drop-shadow">Kadim Kültürün ve Destanların Taşıyıcıları</h2>
+                <p class="text-slate-200 text-sm sm:text-base drop-shadow">Mitolojimizden bozkır töresine uzanan kök değerlerimiz ve simgelerimiz</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+                
+                <!-- SOL GRUP (Bozkır Grubu: Dede Korkut, Otağ, Bozkır Atı) -->
+                <div class="w-full flex flex-col items-center">
+                    <div class="w-full text-center lg:text-left mb-6 border-b border-amber-300/30 pb-2">
+                        <span class="text-sm uppercase tracking-widest text-amber-200 font-bold flex items-center justify-center lg:justify-start gap-2 drop-shadow">
+                            <i class="fa-solid fa-sun text-amber-300"></i> Bozkır & Töremiz
+                        </span>
+                    </div>
+
+                    <div class="w-full flex flex-wrap items-center justify-center gap-5 sm:gap-7">
+                        <!-- 1. DEDE KORKUT (Orta Boy) -->
+                        <div class="flex flex-col items-center group">
+                            <div class="circle-badge w-28 h-28 sm:w-36 sm:h-36 rounded-full aspect-square shrink-0 p-1.5 bg-gradient-to-tr from-amber-400 via-amber-200 to-amber-500 shadow-2xl shadow-black/40">
+                                <img src="dede korkut.jfif" alt="Dede Korkut" class="w-full h-full object-cover rounded-full">
+                            </div>
+                            <span class="mt-2 text-xs sm:text-sm font-serif font-bold text-white drop-shadow">Dede Korkut</span>
+                            <span class="text-[11px] text-amber-100 font-medium drop-shadow">Bilgelik & Maarif</span>
+                        </div>
+
+                        <!-- 2. OTAĞ (En Büyük Boy - Merkez) -->
+                        <div class="flex flex-col items-center group">
+                            <div class="circle-badge w-40 h-40 sm:w-48 sm:h-48 rounded-full aspect-square shrink-0 p-2 bg-gradient-to-tr from-cyan-300 via-amber-300 to-teal-400 shadow-2xl shadow-black/50">
+                                <img src="otağ.jfif" alt="Otağ" class="w-full h-full object-cover rounded-full">
+                            </div>
+                            <span class="mt-2.5 text-sm sm:text-base font-serif font-bold text-white drop-shadow">Otağ</span>
+                            <span class="text-xs text-amber-100 font-medium drop-shadow">Birlik & Aile Ocağı</span>
+                        </div>
+
+                        <!-- 3. BOZKIR ATI (Küçük Boy) -->
+                        <div class="flex flex-col items-center group">
+                            <div class="circle-badge w-24 h-24 sm:w-30 sm:h-30 rounded-full aspect-square shrink-0 p-1 bg-gradient-to-tr from-orange-500 via-amber-300 to-red-500 shadow-xl shadow-black/40">
+                                <img src="bozkır atı.jfif" alt="Bozkır Atı" class="w-full h-full object-cover rounded-full">
+                            </div>
+                            <span class="mt-2 text-xs sm:text-sm font-serif font-bold text-white drop-shadow">Bozkır Atı</span>
+                            <span class="text-[11px] text-amber-100 font-medium drop-shadow">Sadakat & Cesaret</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SAĞ GRUP (Destan Grubu: Manas, Ak Ana, Gulyabani) -->
+                <div class="w-full flex flex-col items-center">
+                    <div class="w-full text-center lg:text-left mb-6 border-b border-cyan-300/30 pb-2">
+                        <span class="text-sm uppercase tracking-widest text-cyan-200 font-bold flex items-center justify-center lg:justify-start gap-2 drop-shadow">
+                            <i class="fa-solid fa-moon text-cyan-300"></i> Destan & Mitoloji
+                        </span>
+                    </div>
+
+                    <div class="w-full flex flex-wrap items-center justify-center gap-5 sm:gap-7">
+                        <!-- 4. MANAS (Orta Boy) -->
+                        <div class="flex flex-col items-center group">
+                            <div class="circle-badge w-32 h-32 sm:w-36 sm:h-36 rounded-full aspect-square shrink-0 p-1.5 bg-gradient-to-tr from-orange-400 via-amber-200 to-cyan-400 shadow-2xl shadow-black/40">
+                                <img src="manas.jfif" alt="Manas Han" class="w-full h-full object-cover object-center rounded-full">
+                            </div>
+                            <span class="mt-2 text-xs sm:text-sm font-serif font-bold text-white drop-shadow">Manas</span>
+                            <span class="text-[11px] text-cyan-100 font-medium drop-shadow">Yiğitlik & Hürriyet</span>
+                        </div>
+
+                        <!-- 5. AK ANA (En Büyük Boy - Merkez) -->
+                        <div class="flex flex-col items-center group">
+                            <div class="circle-badge w-40 h-40 sm:w-48 sm:h-48 rounded-full aspect-square shrink-0 p-2 bg-gradient-to-tr from-cyan-200 via-white to-blue-400 shadow-2xl shadow-black/50">
+                                <img src="ak ana.jfif" alt="Ak Ana" class="w-full h-full object-cover rounded-full">
+                            </div>
+                            <span class="mt-2.5 text-sm sm:text-base font-serif font-bold text-white drop-shadow">Ak Ana</span>
+                            <span class="text-xs text-cyan-100 font-medium drop-shadow">Yaratılış & Hikmet</span>
+                        </div>
+
+                        <!-- 6. GULYABANİ (Küçük Boy) -->
+                        <div class="flex flex-col items-center group">
+                            <div class="circle-badge w-22 h-22 sm:w-28 sm:h-28 rounded-full aspect-square shrink-0 p-1 bg-gradient-to-tr from-emerald-400 via-amber-200 to-teal-700 shadow-xl shadow-black/40">
+                                <img src="gulyabani.jfif" alt="Gulyabani" class="w-full h-full object-cover rounded-full">
+                            </div>
+                            <span class="mt-2 text-xs sm:text-sm font-serif font-bold text-white drop-shadow">Gulyabani</span>
+                            <span class="text-[11px] text-cyan-100 font-medium drop-shadow">Gölge & Uyarı</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Günün Değeri ve Atasözü Kartı -->
+        <section class="w-full max-w-3xl mb-16">
+            <div class="relative group card-glass gold-border rounded-2xl p-6 sm:p-8 transition-all hover:shadow-2xl hover:shadow-amberGold/15">
+                <div class="absolute -top-3.5 left-6 px-3.5 py-1 rounded-full bg-gradient-to-r from-amberGold to-otagKizil text-bozkir-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-scroll"></i> Günün Atasözü & Hikmeti
+                </div>
+                
+                <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex-1 pr-2">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span id="quoteValue" class="text-xs px-2.5 py-0.5 rounded-full bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40 font-semibold uppercase tracking-wide">
+                                Kök Değer: Eğitim ve Terbiye
+                            </span>
+                        </div>
+                        <blockquote id="quoteText" class="text-xl sm:text-2xl font-serif font-semibold text-amberGold-light tracking-wide italic mb-2">
+                            "Ağaç yaş iken eğilir."
+                        </blockquote>
+                        <p id="quoteMeaning" class="text-slate-300 text-sm sm:text-base leading-snug">
+                            İnsanlar küçük yaşta kolay eğitilir, doğru erdemler ve ahlaki değerler çocukken zihne ve kalbe nakşedilir.
+                        </p>
+                    </div>
+                    <button onclick="changeQuote()" class="self-end sm:self-center px-4 py-2.5 rounded-xl border border-amberGold/40 text-amberGold-light hover:bg-amberGold/20 active:scale-90 transition flex items-center gap-2 text-sm font-medium" title="Yeni Söz Getir">
+                        <i class="fa-solid fa-rotate text-xs"></i>
+                        <span>Yenile</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Oyun Modları Seçimi -->
+        <section id="gameModes" class="w-full mb-16">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-amberGold-light tracking-wide mb-2">Maarif Yarışma Modları</h2>
+                <p class="text-slate-400 text-sm sm:text-base">Atalarımızın mirasını keşfedeceğin mücadeleyi belirle</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Mod 1 -->
+                <div class="group relative card-glass gold-border rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-amberGold/15">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Kolay / Klasik</span>
+                    </div>
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-amberGold/15 border border-amberGold/30 text-amberGold flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-puzzle-piece"></i>
+                        </div>
+                        <h3 class="text-xl font-serif font-bold text-white mb-2">Eksik Kelimeyi Tamamla</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                            Atasözünde eksik bırakılan hikmetli sözcüğü bul, atasözünü aslına uygun tamamla.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
+                            <span><i class="fa-solid fa-layer-group text-amberGold mr-1.5"></i> 100+ Atasözü</span>
+                            <span><i class="fa-solid fa-star text-amberGold mr-1.5"></i> Temel Maarif</span>
+                        </div>
+                        <a href="eksik_kelime.html" target="_blank"
+   class="w-full py-3 rounded-xl bg-amberGold/20 hover:bg-amberGold text-amberGold-light hover:text-bozkir-950 font-bold text-sm border border-amberGold/40 transition block text-center">
+    Bu Modla Başla
+</a>
+                    </div>
+                </div>
+
+                <!-- Mod 2 -->
+                <div class="group relative card-glass turkuaz-border rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-turkuaz/20">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40">Kök Değer Odaklı</span>
+                    </div>
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-turkuaz/15 border border-turkuaz/30 text-turkuaz-light flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                        <h3 class="text-xl font-serif font-bold text-white mb-2">Değerden Atasözüne</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                            Vatanseverlik, adalet, vefa ve dürüstlük gibi erdemlerin işlendiği doğru atasözünü eşleştir.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
+                            <span><i class="fa-solid fa-compass text-turkuaz-light mr-1.5"></i> Kök Değerler</span>
+                            <span><i class="fa-solid fa-bolt text-turkuaz-light mr-1.5"></i> 2x Puan</span>
+                        </div>
+                        <button onclick="startGameModal('Değerden Atasözüne')" class="w-full py-3 rounded-xl bg-turkuaz hover:bg-turkuaz-light text-bozkir-950 font-bold text-sm transition">
+                            Bu Modla Başla
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mod 3 -->
+                <div class="group relative card-glass border border-otagKizil/50 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-otagKizil/20">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">Hızlı & Heyecanlı</span>
+                    </div>
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-otagKizil/20 border border-otagKizil/40 text-otagKizil-light flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-stopwatch-20"></i>
+                        </div>
+                        <h3 class="text-xl font-serif font-bold text-white mb-2">Zamana Karşı Bilgelik</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                            60 saniye boyunca art arda gelen atasözlerini hatasız çöz, seri puanları ve maarif unvanını kap!
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
+                            <span><i class="fa-solid fa-clock text-otagKizil-light mr-1.5"></i> 60 Saniye</span>
+                            <span><i class="fa-solid fa-fire text-otagKizil-light mr-1.5"></i> Kombo Çarpanı</span>
+                        </div>
+                        <button onclick="startGameModal('Zamana Karşı Bilgelik')" class="w-full py-3 rounded-xl bg-otagKizil/30 hover:bg-otagKizil text-white font-bold text-sm border border-otagKizil/50 transition">
+                            Bu Modla Başla
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal 1: Nasıl Oynanır? -->
+    <div id="howToPlayModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-bozkir-900 card-glass gold-border rounded-2xl max-w-lg w-full p-6 sm:p-8 text-left shadow-2xl relative">
+            <button onclick="closeModal('howToPlayModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-amberGold/20 flex items-center justify-center text-amberGold text-lg">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3 class="text-xl font-serif font-bold text-amberGold-light">Nasıl Oynanır?</h3>
+            </div>
+            <div class="space-y-4 text-slate-300 text-sm leading-relaxed">
+                <div class="flex items-start space-x-3">
+                    <span class="w-6 h-6 rounded-full bg-amberGold/20 text-amberGold flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+                    <p>Kendine uygun olan oyun modunu seç (Kelime Tamamlama, Değer Eşleştirme veya Zamana Karşı).</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="w-6 h-6 rounded-full bg-turkuaz/20 text-turkuaz-light flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+                    <p>Atasözünün taşıdığı derin hikmeti, otağ kültürümüzü ve ahlaki öğüdü düşünüp doğru seçeneği işaretle.</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="w-6 h-6 rounded-full bg-otagKizil/30 text-amber-200 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+                    <p>Seri doğru cevaplarla Dede Korkut hikmet puanlarını katla, maarif listesinde en üst sıraya yerleş!</p>
+                </div>
+            </div>
+            <button onclick="closeModal('howToPlayModal')" class="mt-8 w-full py-3 rounded-xl bg-gradient-to-r from-amberGold to-otagKizil text-bozkir-950 font-bold hover:brightness-110 transition">
+                Anladım, Başlayalım
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 2: Skor Tablosu -->
+    <div id="leaderboardModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-bozkir-900 card-glass gold-border rounded-2xl max-w-md w-full p-6 text-left shadow-2xl relative">
+            <button onclick="closeModal('leaderboardModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-amberGold/20 flex items-center justify-center text-amberGold text-lg">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h3 class="text-xl font-serif font-bold text-amberGold-light">Maarif Kürsüsü Sıralaması</h3>
+            </div>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center justify-between p-3 rounded-xl bg-amberGold/10 border border-amberGold/30">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-amberGold font-bold text-sm w-4">🥇</span>
+                        <span class="text-white font-semibold text-sm">Bilge Kağan</span>
+                    </div>
+                    <span class="text-amberGold-light font-bold text-sm">3,850 Puan</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-xl bg-turkuaz/10 border border-turkuaz/30">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-turkuaz-light font-bold text-sm w-4">🥈</span>
+                        <span class="text-white font-medium text-sm">Dede Korkut</span>
+                    </div>
+                    <span class="text-turkuaz-light font-bold text-sm">3,420 Puan</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-xl bg-otagKizil/15 border border-otagKizil/30">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-amber-500 font-bold text-sm w-4">🥉</span>
+                        <span class="text-white font-medium text-sm">Yunus Emre</span>
+                    </div>
+                    <span class="text-amber-200 font-bold text-sm">2,990 Puan</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/50">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-slate-400 font-bold text-sm w-4">4</span>
+                        <span class="text-slate-300 font-medium text-sm">Hacı Bektaş Veli</span>
+                    </div>
+                    <span class="text-slate-300 font-bold text-sm">2,410 Puan</span>
+                </div>
+            </div>
+            <button onclick="closeModal('leaderboardModal')" class="w-full py-2.5 rounded-xl border border-amberGold/30 text-amberGold-light hover:bg-amberGold/20 font-medium transition text-sm">
+                Kapat
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 3: Oyuna Giriş Bildirimi / Başlatma -->
+    <div id="startModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-bozkir-900 card-glass gold-border rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="closeModal('startModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-16 h-16 rounded-full bg-amberGold/20 text-amberGold flex items-center justify-center text-3xl mx-auto mb-4 border border-amberGold/40">
+                <i class="fa-solid fa-campground"></i>
+            </div>
+            <h3 id="selectedModeTitle" class="text-xl font-serif font-bold text-amberGold-light mb-2">Yolculuk Başlıyor</h3>
+            <p class="text-slate-300 text-sm mb-6">Ataların hikmetini öğrenmek için adını gir!</p>
+            <input type="text" id="playerNameInput" placeholder="Yiğit / Öğrenci Adınız..." class="w-full px-4 py-3 rounded-xl bg-bozkir-950 border border-amberGold/40 text-white placeholder-slate-500 focus:outline-none focus:border-amberGold mb-4 text-center font-medium">
+            <button onclick="launchGame()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold hover:brightness-110 active:scale-95 transition">
+                Otağa Gir ve Başla!
+            </button>
+        </div>
+    </div>
+
+    <!-- Alt Bilgi / Footer -->
+    <footer class="w-full border-t border-amberGold/20 py-8 card-glass text-center text-xs text-slate-400">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-campground text-amberGold"></i>
+                <span class="font-serif font-semibold text-slate-200">Ataların Sözünde Maarifin İzinde</span>
+                <span>— Türk Kültür Mirası ve Değerler Eğitimi</span>
+            </div>
+            <p>© 2026 Maarif Modeli. "Köklerden Geleceğe Erdemli Nesiller."</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Mantığı -->
+    <script>
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(450, now);
+                    osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+                    osc.start(now);
+                    osc.stop(now + 0.28);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(140, now + 0.15);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                }
+            } catch (e) {
+                console.error("Audio error: ", e);
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                playSound('click');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            }
+        }
+
+        // Günün Atasözleri ve Kültürel Değerler
+        const quotesPool = [
+            { quote: "Ağaç yaş iken eğilir.", value: "Eğitim ve Terbiye", meaning: "İnsanlar küçük yaşta kolay eğitilir, doğru erdemler erken yaşta kazanılır." },
+            { quote: "Birlikten kuvvet doğar.", value: "Birlik ve Dayanışma (Otağ Ruhu)", meaning: "Birlikte hareket eden topluluklar zorlukları kolayca aşar." },
+            { quote: "At binenin, kılıç kuşananın.", value: "Liyakat ve Gayret", meaning: "Her hak ve imkân, onun hakkını veren ve onu kullanabilen kişiye yakışır." },
+            { quote: "Tatlı dil yılanı deliğinden çıkarır.", value: "Nezaket ve Hoşgörü", meaning: "Gönül alıcı, tatlı sözlerle en katı kalpler dahi yumuşatılır." },
+            { quote: "İşleyen demir pas tutmaz.", value: "Çalışkanlık ve Üretkenlik", meaning: "Sürekli çalışan, emek veren insan hem dinç kalır hem de milletine fayda sağlar." },
+            { quote: "Komşu komşunun külüne muhtaçtır.", value: "İmece ve Komşuluk", meaning: "İnsanlar en küçük hususta bile birbirlerinin yardımlaşmasına ihtiyaç duyar." }
+        ];
+
+        let currentQuoteIndex = 0;
+        function changeQuote() {
+            playSound('click');
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * quotesPool.length);
+            } while (nextIndex === currentQuoteIndex && quotesPool.length > 1);
+
+            currentQuoteIndex = nextIndex;
+            const item = quotesPool[currentQuoteIndex];
+
+            const textEl = document.getElementById('quoteText');
+            const meanEl = document.getElementById('quoteMeaning');
+            const valEl = document.getElementById('quoteValue');
+
+            textEl.style.opacity = '0';
+            meanEl.style.opacity = '0';
+            valEl.style.opacity = '1';
+
+            setTimeout(() => {
+                textEl.innerText = `"${item.quote}"`;
+                meanEl.innerText = item.meaning;
+                valEl.innerText = `Kök Değer: ${item.value}`;
+                textEl.style.opacity = '1';
+                meanEl.style.opacity = '1';
+                valEl.style.opacity = '1';
+            }, 180);
+        }
+
+        // Modal Yönetimi
+        function openModal(modalId) {
+            playSound('click');
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeModal(modalId) {
+            playSound('click');
+            const modal = document.getElementById(modalId);
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function startGameModal(modeName) {
+            document.getElementById('selectedModeTitle').innerText = modeName;
+            openModal('startModal');
+        }
+
+        function launchGame() {
+            playSound('correct');
+            const name = document.getElementById('playerNameInput').value.trim() || 'Kutlu Yiğit';
+            const mode = document.getElementById('selectedModeTitle').innerText;
+            
+            const startModalInner = document.querySelector('#startModal > div');
+            startModalInner.innerHTML = `
+                <div class="py-6 text-center">
+                    <div class="w-14 h-14 rounded-full bg-turkuaz/20 text-turkuaz-light flex items-center justify-center text-2xl mx-auto mb-4 border border-turkuaz/40 animate-pulse">
+                        <i class="fa-solid fa-horse"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-bold text-white mb-2">Otağın Kapısı Açılıyor!</h3>
+                    <p class="text-slate-300 text-sm mb-4">Hoş geldin, <strong class="text-amberGold-light">${name}</strong>!<br><strong>${mode}</strong> yükleniyor...</p>
+                    <div class="w-full bg-bozkir-950 rounded-full h-2 mb-4 overflow-hidden border border-amberGold/20">
+                        <div class="bg-gradient-to-r from-amberGold to-otagKizil h-2 rounded-full animate-pulse" style="width: 75%"></div>
+                    </div>
+                    <button onclick="closeModal('startModal'); location.reload();" class="text-xs text-slate-400 hover:text-white underline">Vazgeç ve Kapat</button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

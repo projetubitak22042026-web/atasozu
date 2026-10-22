@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Değerden Atasözüne - Olay ve Değer Eşleştirme Oyunu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bozkir: {
+                            950: '#070c12',
+                            900: '#0c131a',
+                            850: '#121d27',
+                            800: '#1c2d3d',
+                            700: '#284055'
+                        },
+                        turkuaz: {
+                            DEFAULT: '#0ea5b7',
+                            light: '#38d9ec',
+                            dark: '#087382'
+                        },
+                        otagKizil: {
+                            DEFAULT: '#c85a28',
+                            light: '#e07644',
+                            dark: '#8c3510'
+                        },
+                        amberGold: {
+                            DEFAULT: '#d4af37',
+                            light: '#f7e7a9',
+                            dark: '#9e7b16'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+       .pattern-bg {
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
+                radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #38d9ec 0%, #087382 100%);
+            background-size: 42px 42px, 42px 42px, 100% 100%;
+            background-position: 0 0, 21px 21px, 0 0;
+            background-attachment: fixed;
+        }
+
+        .gold-border {
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.08);
+        }
+
+        .turkuaz-border {
+            border: 1px solid rgba(14, 165, 183, 0.45);
+            box-shadow: 0 0 20px rgba(14, 165, 183, 0.12);
+        }
+
+        .gold-text-gradient {
+            background: linear-gradient(135deg, #fff2a3 0%, #d4af37 50%, #c85a28 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-glass {
+            background: rgba(18, 29, 39, 0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        #candyCanvas {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="pattern-bg text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-400 selection:text-bozkir-950 relative overflow-x-hidden">
+
+    <!-- Bayram Şekeri Saçılma Tuvali -->
+    <canvas id="candyCanvas"></canvas>
+
+    <!-- ÜST BİLGİ & DURUM ÇUBUĞU -->
+    <header class="w-full card-glass border-b border-amberGold/25 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showHomeScreen()">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-otagKizil via-amberGold to-turkuaz p-0.5 shadow-lg shadow-amberGold/20 flex items-center justify-center">
+                    <div class="w-full h-full bg-bozkir-900 rounded-full flex items-center justify-center text-amberGold">
+                        <i class="fa-solid fa-campground text-base"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="font-serif font-bold text-xs sm:text-sm text-amberGold-light tracking-wide block">ATALARIN SÖZÜNDE MAARİFİN İZİNDE</span>
+                    <span class="text-[10px] text-turkuaz-light uppercase tracking-widest font-semibold block">Değerden Atasözüne: Olay Eşleştirme</span>
+                </div>
+            </div>
+
+            <!-- Sağ Aksiyon ve Göstergeler -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- Canlar -->
+                <div id="livesContainer" style="display: none;" class="items-center space-x-1 text-rose-500 text-sm sm:text-base" title="Kalan Can">
+                    <i class="fa-solid fa-heart heart-1 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-2 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-3 transition-transform"></i>
+                </div>
+
+                <!-- Puan -->
+                <div id="scoreContainer" style="display: none;" class="px-3 py-1 rounded-xl bg-amberGold/15 border border-amberGold/30 items-center space-x-1.5">
+                    <i class="fa-solid fa-award text-amberGold text-xs sm:text-sm"></i>
+                    <span id="scoreText" class="font-bold text-amberGold-light text-xs sm:text-sm tracking-wider">0</span>
+                </div>
+
+                <!-- Saz / Ses Butonu -->
+                <button id="soundBtn" onclick="toggleSound()" class="p-2 sm:p-2.5 rounded-xl border border-turkuaz/30 text-turkuaz-light hover:bg-turkuaz/10 transition cursor-pointer" title="Saz / Bağlama Sesi">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-xs sm:text-sm"></i>
+                </button>
+
+                <!-- Nasıl Oynanır -->
+                <button onclick="openModal('howToPlayModal')" class="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-amberGold/30 text-amberGold-light hover:bg-amberGold/10 transition cursor-pointer">
+                    <i class="fa-regular fa-circle-question mr-1.5"></i> Kurallar
+                </button>
+            </div>
+        </div>
+
+        <!-- İlerleme Çubuğu -->
+        <div id="progressContainer" style="display: none;" class="w-full bg-bozkir-950/90 h-1.5 sm:h-2 relative overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-otagKizil via-amberGold to-turkuaz transition-all duration-300 ease-out" style="width: 0%;"></div>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-center items-center">
+
+        <!-- ================= 1. GİRİŞ & TANITIM EKRANI ================= -->
+        <div id="homeSection" style="display: flex;" class="w-full flex-col items-center">
+            
+            <section class="text-center max-w-3xl mb-10">
+                <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-otagKizil/20 to-turkuaz/20 border border-amberGold/40 text-amberGold-light text-xs font-semibold uppercase tracking-wider mb-4">
+                    <i class="fa-solid fa-heart text-amberGold"></i>
+                    <span>Kök Değerler & Hikmetli Olaylar</span>
+                </div>
+                
+                <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif font-black gold-text-gradient tracking-wide leading-tight mb-3 uppercase">
+                    Değerden Atasözüne
+                </h1>
+                <p class="text-base sm:text-xl text-turkuaz-light font-medium mb-3">
+                    Olay ve Değer Eşleştirme Oyunu
+                </p>
+                <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light mb-8 max-w-2xl mx-auto">
+                    Her oyunda 150 zengin olay arasından <strong>tamamen rastgele 10 farklı soru</strong> ve karışık seçenekler gelir. Olayı okuyun, doğru atasözünü seçin; <strong>saz tınıları</strong> eşliğinde etrafa <strong>bayram şekerleri</strong> saçılsın!
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="startScenarioGame()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold text-lg shadow-xl shadow-amberGold/25 hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-3 cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Yeni 10 Senaryo Başlat</span>
+                    </button>
+                    <a href="#kulturelVitrin" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass turkuaz-border text-turkuaz-light font-semibold text-base hover:bg-turkuaz/10 transition flex items-center justify-center space-x-2 cursor-pointer">
+                        <i class="fa-solid fa-campground text-turkuaz"></i>
+                        <span>Kültür Mirasını Gör</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- KÜLTÜREL VİTRİN: OTAĞ (Yatay, Geniş Kart Yapısı) -->
+            <section id="kulturelVitrin" class="w-full max-w-4xl mb-12">
+                <div class="card-glass gold-border rounded-3xl overflow-hidden shadow-2xl hover:border-amberGold transition-all duration-300 group">
+                    <div class="flex flex-col md:flex-row items-stretch">
+                        <!-- Yatay Görsel Alanı (otağ.jfif) -->
+                        <div class="md:w-1/2 h-64 sm:h-72 md:h-auto min-h-[260px] relative overflow-hidden">
+                            <img src="otağ.jfif" alt="Otağ" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-bozkir-900/90 via-bozkir-900/30 to-transparent"></div>
+                            <span class="absolute top-4 left-4 px-3.5 py-1 rounded-full text-xs font-bold bg-amberGold text-bozkir-950 shadow-md">
+                                <i class="fa-solid fa-campground mr-1.5"></i> Birlik & Aile Ocağı
+                            </span>
+                        </div>
+                        <!-- Bilgi Alanı -->
+                        <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-2 text-xs uppercase tracking-widest text-amberGold font-semibold mb-2">
+                                    <i class="fa-solid fa-sun"></i>
+                                    <span>Bozkırın Kadim Çatısı</span>
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-3">Otağ</h3>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed font-light mb-6">
+                                    Bozkırın kalbinde tüten ocak, toy meclislerinin kurulduğu, istişare ve dayanışmanın şekillendiği kutlu mekân. Birlikten doğan kuvvetin ve kök değerlerimizin en somut timsalidir.
+                                </p>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-amberGold/30 flex items-center space-x-3">
+                                <i class="fa-solid fa-quote-left text-amberGold text-xl shrink-0 opacity-70"></i>
+                                <div class="text-xs sm:text-sm text-amberGold-light italic">
+                                    "Ocağı tüten obanın dirliği bozulmaz; baş başa vermeyince taş yerinden kalkmaz."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kapsanan Kök Değerler Vitrini -->
+            <section class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10 text-center">
+                <div class="p-4 rounded-2xl card-glass gold-border">
+                    <i class="fa-solid fa-handshake-angle text-2xl text-amberGold mb-2 block"></i>
+                    <h4 class="font-serif font-bold text-sm text-white mb-1">Dayanışma & Birlik</h4>
+                    <p class="text-[11px] text-slate-400">İmece, kardeşlik ve otağ ruhu</p>
+                </div>
+                <div class="p-4 rounded-2xl card-glass turkuaz-border">
+                    <i class="fa-solid fa-heart-pulse text-2xl text-turkuaz-light mb-2 block"></i>
+                    <h4 class="font-serif font-bold text-sm text-white mb-1">Empati & Halden Anlama</h4>
+                    <p class="text-[11px] text-slate-400">Başkalarının derdine ortak olma</p>
+                </div>
+                <div class="p-4 rounded-2xl card-glass border border-otagKizil/50">
+                    <i class="fa-solid fa-scale-balanced text-2xl text-otagKizil-light mb-2 block"></i>
+                    <h4 class="font-serif font-bold text-sm text-white mb-1">Dürüstlük & Doğruluk</h4>
+                    <p class="text-[11px] text-slate-400">Mertlik, hakikat ve özü bir olmak</p>
+                </div>
+                <div class="p-4 rounded-2xl card-glass gold-border">
+                    <i class="fa-solid fa-seedling text-2xl text-emerald-400 mb-2 block"></i>
+                    <h4 class="font-serif font-bold text-sm text-white mb-1">Çalışkanlık & Sabır</h4>
+                    <p class="text-[11px] text-slate-400">Alın teri, sebat ve sorumluluk</p>
+                </div>
+            </section>
+
+            <!-- Günün Atasözü ve Değeri Kartı (İkinci Oyundan Entegre Edilen Bölüm) -->
+            <section class="w-full max-w-3xl mb-12">
+                <div class="relative card-glass gold-border rounded-2xl p-6 sm:p-7">
+                    <div class="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-gradient-to-r from-amberGold to-otagKizil text-bozkir-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-scroll"></i> Günün Atasözü & Hikmeti
+                    </div>
+                    
+                    <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex-1 pr-2 w-full">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span id="homeQuoteValue" class="text-xs px-2.5 py-0.5 rounded-full bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40 font-semibold uppercase tracking-wide">
+                                    Kök Değer: Dayanışma
+                                </span>
+                            </div>
+                            <!-- Günün Atasözü Görseli -->
+                            <img src="Gemini_Generated_Image_3ufn9p3ufn9p3ufn.jfif" alt="Türk Atasözleri" class="w-full h-44 sm:h-52 object-cover rounded-xl mb-4 border border-amberGold/40 shadow-lg">
+                            <blockquote id="homeQuoteText" class="text-xl sm:text-2xl font-serif font-semibold text-amberGold-light tracking-wide italic mb-2 transition-opacity duration-200">
+                                "Yalnız taş, duvar olmaz."
+                            </blockquote>
+                            <p id="homeQuoteMeaning" class="text-slate-300 text-xs sm:text-sm leading-snug transition-opacity duration-200">
+                                İnsanlar tek başlarına büyük işleri başaramazlar; yardımlaşma ve dayanışma esastır.
+                            </p>
+                        </div>
+                        <button type="button" onclick="refreshHomeQuote()" class="self-end sm:self-center px-4 py-2.5 rounded-xl border border-amberGold/40 text-amberGold-light hover:bg-amberGold/20 active:scale-95 transition flex items-center gap-2 text-xs font-semibold cursor-pointer shrink-0 z-10" title="Yeni Söz Getir">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                            <span>Yenile</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= 2. AKTİF OYUN EKRANI ================= -->
+        <div id="gameSection" style="display: none;" class="w-full max-w-3xl flex-col space-y-5">
+            <!-- Soru Sayacı, Değer Rozeti ve Seri -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span id="questionCounterBadge" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amberGold/20 text-amberGold-light border border-amberGold/30">
+                        Soru 1 / 10
+                    </span>
+                    <span id="currentValueBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40">
+                        <i class="fa-solid fa-heart mr-1.5 text-otagKizil-light"></i> <span id="badgeValueText">Değer Adı</span>
+                    </span>
+                </div>
+
+                <!-- Kombo Rozeti -->
+                <div id="comboBadge" style="display: none;" class="items-center space-x-1.5 px-3 py-1 rounded-full bg-otagKizil/20 border border-otagKizil/40 text-otagKizil-light text-xs font-bold">
+                    <i class="fa-solid fa-fire text-amberGold"></i>
+                    <span id="comboText">2x Seri</span>
+                </div>
+            </div>
+
+            <!-- Senaryo & Olay Kartı -->
+            <div class="card-glass gold-border rounded-3xl p-6 sm:p-9 relative overflow-hidden">
+                <div class="flex items-center justify-between border-b border-amberGold/20 pb-3 mb-4">
+                    <div class="flex items-center space-x-2 text-xs uppercase tracking-widest text-amberGold-light font-bold">
+                        <i class="fa-solid fa-book-open-reader text-amberGold"></i>
+                        <span>Olayı / Durumu İnceleyiniz:</span>
+                    </div>
+                    <span class="text-[11px] text-turkuaz-light/80 italic">Hangi atasözü ile ilgilidir?</span>
+                </div>
+
+                <!-- Olay Metni -->
+                <div id="scenarioDisplay" class="text-base sm:text-lg text-slate-100 font-normal leading-relaxed my-3 bg-bozkir-950/70 p-4 sm:p-5 rounded-2xl border border-amberGold/20">
+                    <!-- Dinamik senaryo metni -->
+                </div>
+
+                <!-- Dede Korkut İpucu Bildirimi -->
+                <div id="hintBoxContainer" style="display: none;" class="text-xs text-turkuaz-light bg-turkuaz/10 py-2 px-4 rounded-xl border border-turkuaz/30 mt-3 text-left">
+                    <i class="fa-solid fa-lightbulb text-amberGold mr-1"></i> <strong class="text-white">Dede Korkut İpucu:</strong> <span id="hintBoxText"></span>
+                </div>
+            </div>
+
+            <!-- Kültürel Joker Butonları -->
+            <div class="flex items-center justify-center gap-2 sm:gap-3 py-1">
+                <button id="jokerFifty" onclick="useFiftyFifty()" class="flex-1 py-2.5 px-3 rounded-xl card-glass border border-amberGold/30 text-amberGold-light text-xs font-semibold hover:bg-amberGold/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-percent text-amberGold"></i>
+                    <span>%50 Şık Ele</span>
+                </button>
+                <button id="jokerClue" onclick="useClueJoker()" class="flex-1 py-2.5 px-3 rounded-xl card-glass border border-turkuaz/30 text-turkuaz-light text-xs font-semibold hover:bg-turkuaz/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-feather-pointed text-turkuaz-light"></i>
+                    <span>Bilge İpucu</span>
+                </button>
+                <button id="jokerPass" onclick="usePassJoker()" class="flex-1 py-2.5 px-3 rounded-xl card-glass border border-otagKizil/40 text-amber-200 text-xs font-semibold hover:bg-otagKizil/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-forward-step text-otagKizil-light"></i>
+                    <span>Soruyu Değiştir</span>
+                </button>
+            </div>
+
+            <!-- Atasözü Seçenekleri Izgarası (4 Şık) -->
+            <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- Şıklar dinamik yüklenir -->
+            </div>
+        </div>
+
+        <!-- ================= 3. OYUN SONU KARNE EKRANI ================= -->
+        <div id="endSection" style="display: none;" class="w-full max-w-3xl card-glass gold-border rounded-3xl p-6 sm:p-10 flex-col items-center">
+            <div class="w-20 h-20 rounded-2xl bg-amberGold/20 border border-amberGold/40 text-amberGold flex items-center justify-center text-4xl mb-4 shadow-xl">
+                <i class="fa-solid fa-award"></i>
+            </div>
+
+            <span id="resultRankBadge" class="px-4 py-1.5 rounded-full bg-amberGold/20 border border-amberGold/40 text-amberGold-light text-xs font-bold uppercase tracking-wider mb-3">
+                Değerler Muhafızı
+            </span>
+
+            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mb-2 text-center">
+                10 Senaryo Tamamlandı!
+            </h2>
+            <p id="resultComment" class="text-slate-300 text-sm text-center max-w-md mb-8">
+                Tebrikler! Çözdüğünüz olayları, eşleşen atasözlerini ve temsil ettiği kök değerleri aşağıdan inceleyebilirsiniz.
+            </p>
+
+            <!-- Skor Kartları -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mb-8 text-center">
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-amberGold/20">
+                    <span class="text-xs text-slate-400 block mb-1">Toplam Puan</span>
+                    <span id="finalScore" class="text-2xl font-bold font-serif text-amberGold-light">0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-turkuaz/20">
+                    <span class="text-xs text-slate-400 block mb-1">Başarı Oranı</span>
+                    <span id="finalAccuracy" class="text-2xl font-bold font-serif text-emerald-400">%0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-otagKizil/20">
+                    <span class="text-xs text-slate-400 block mb-1">Doğru / Yanlış</span>
+                    <span id="finalRatio" class="text-2xl font-bold font-serif text-white">0 / 0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-amberGold/20">
+                    <span class="text-xs text-slate-400 block mb-1">En Uzun Seri</span>
+                    <span id="finalStreak" class="text-2xl font-bold font-serif text-orange-400">0</span>
+                </div>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-8">
+                <button onclick="startScenarioGame()" class="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-shuffle"></i>
+                    <span>Yeni 10 Senaryo Başlat</span>
+                </button>
+                <button onclick="showHomeScreen()" class="flex-1 py-3.5 px-6 rounded-xl border border-turkuaz/40 text-turkuaz-light hover:bg-turkuaz/10 font-semibold transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-campground"></i>
+                    <span>Otağa Dön</span>
+                </button>
+            </div>
+
+            <!-- 10 Senaryonun Detaylı İnceleme Tablosu -->
+            <div class="w-full border-t border-amberGold/20 pt-6">
+                <h4 class="text-base font-serif font-bold text-amberGold-light mb-4 text-center">
+                    <i class="fa-solid fa-list-check mr-2"></i> Çözdüğünüz 10 Olay & Atasözleri
+                </h4>
+                <div id="reviewList" class="space-y-3.5 max-h-96 overflow-y-auto pr-1">
+                    <!-- Dinamik doldurulur -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- GERİ BİLDİRİM VE DEĞER AÇIKLAMA MODALI -->
+    <div id="feedbackModal" style="display: none;" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+        <div class="card-glass gold-border rounded-3xl max-w-lg w-full p-6 sm:p-8 text-center shadow-2xl relative">
+            <div id="feedbackIcon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3"></div>
+            <h3 id="feedbackTitle" class="text-2xl font-serif font-bold mb-2"></h3>
+            
+            <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amberGold/20 via-turkuaz/20 to-otagKizil/20 border border-amberGold/50 text-amberGold-light text-xs sm:text-sm font-bold shadow mb-3">
+                <i class="fa-solid fa-heart text-turkuaz-light"></i>
+                <span>Kök Değer:</span>
+                <span id="feedbackValue" class="text-white font-extrabold uppercase tracking-wide"></span>
+            </div>
+
+            <p id="feedbackQuote" class="text-lg font-serif text-amberGold-light font-bold mb-4 px-2"></p>
+
+            <div class="bg-bozkir-950/90 p-4 rounded-2xl border border-amberGold/20 text-slate-300 text-xs sm:text-sm leading-relaxed text-left mb-6">
+                <strong class="text-amberGold block mb-1.5"><i class="fa-solid fa-scroll mr-1"></i> Olayın Hikmeti & Öğüdü:</strong>
+                <span id="feedbackMeaning"></span>
+            </div>
+
+            <button id="nextQuestionBtn" onclick="nextQuestion()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer">
+                <span>Sonraki Senaryoya Geç</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- NASIL OYNANIR MODALI -->
+    <div id="howToPlayModal" style="display: none;" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+        <div class="card-glass gold-border rounded-3xl max-w-md w-full p-6 text-left shadow-2xl relative">
+            <button onclick="closeModal('howToPlayModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-amberGold/20 flex items-center justify-center text-amberGold text-lg">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3 class="text-xl font-serif font-bold text-amberGold-light">Oyun Kuralları</h3>
+            </div>
+            <div class="space-y-3.5 text-slate-300 text-xs sm:text-sm leading-relaxed">
+                <p><strong>1. Kök Değer ve Olay:</strong> Her soruda size bir kök değer ve bu değeri anlatan gerçekçi bir hayat hikayesi/senaryo sunulur.</p>
+                <p><strong>2. Doğru Atasözünü Seçin:</strong> 4 seçenek arasından bu olaydaki ana fikri en güzel ifade eden atasözünü bulun.</p>
+                <p><strong>3. Saz Tınısı & Bayram Şekeri:</strong> Her doğru cevapta Türk bağlama/saz tezene tınısı çalar ve etrafa renkli bayram şekerleri saçılır!</p>
+                <p><strong>4. Her Öğrenciye Farklı Soru:</strong> 150 atasözlük havuzdan her oyunda rastgele 10 soru çekilir ve seçenekler baştan karıştırılır.</p>
+            </div>
+            <button onclick="closeModal('howToPlayModal')" class="mt-6 w-full py-3 rounded-xl bg-amberGold text-bozkir-950 font-bold hover:brightness-110 transition cursor-pointer">
+                Anladım, Başlayalım
+            </button>
+        </div>
+    </div>
+
+    <!-- ALT BİLGİ -->
+    <footer class="w-full card-glass border-t border-amberGold/20 py-4 text-center text-xs text-slate-400">
+        <p>Ataların Sözünde Maarifin İzinde &copy; 2026 — Değerden Atasözüne Senaryo & Değer Eşleştirme Oyunu</p>
+    </footer>
+
+    <!-- JAVASCRIPT: 150 DEĞER VE OLAY HAVUZU, SAZ / BAĞLAMA SESİ VE ŞEKER MOTORU -->
+    <script>
+        // ================= 1. RENKLİ BAYRAM ŞEKERLERİ MOTORU =================
+        const canvas = document.getElementById('candyCanvas');
+        const ctx = canvas.getContext('2d');
+        let candies = [];
+        let candyAnimId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function scatterCandies() {
+            playSazSound('correct');
+            const colors = ['#f43f5e', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#e11d48'];
+            for (let i = 0; i < 75; i++) {
+                candies.push({
+                    x: canvas.width / 2 + (Math.random() * 160 - 80),
+                    y: canvas.height * 0.4 + (Math.random() * 60 - 30),
+                    radius: Math.random() * 8 + 7,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    type: Math.random() > 0.4 ? 'wrapped' : 'round',
+                    speedX: (Math.random() - 0.5) * 16,
+                    speedY: Math.random() * -14 - 6,
+                    gravity: 0.35,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 15,
+                    opacity: 1
+                });
+            }
+            if (!candyAnimId) {
+                renderCandies();
+            }
+        }
+
+        function renderCandies() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = candies.length - 1; i >= 0; i--) {
+                const c = candies[i];
+                c.x += c.speedX;
+                c.y += c.speedY;
+                c.speedY += c.gravity;
+                c.rotation += c.rotationSpeed;
+                c.opacity -= 0.011;
+
+                if (c.opacity <= 0 || c.y > canvas.height) {
+                    candies.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.translate(c.x, c.y);
+                ctx.rotate((c.rotation * Math.PI) / 180);
+                ctx.globalAlpha = Math.max(0, c.opacity);
+
+                if (c.type === 'wrapped') {
+                    ctx.fillStyle = c.color;
+                    ctx.beginPath();
+                    ctx.moveTo(-c.radius * 0.7, 0);
+                    ctx.lineTo(-c.radius * 1.5, -c.radius * 0.7);
+                    ctx.lineTo(-c.radius * 1.5, c.radius * 0.7);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.moveTo(c.radius * 0.7, 0);
+                    ctx.lineTo(c.radius * 1.5, -c.radius * 0.7);
+                    ctx.lineTo(c.radius * 1.5, c.radius * 0.7);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, c.radius, c.radius * 0.75, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, c.radius * 0.45, 0, Math.PI);
+                    ctx.stroke();
+                } else {
+                    ctx.fillStyle = c.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, c.radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(-c.radius * 0.3, -c.radius * 0.3, c.radius * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            if (candies.length > 0) {
+                candyAnimId = requestAnimationFrame(renderCandies);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cancelAnimationFrame(candyAnimId);
+                candyAnimId = null;
+            }
+        }
+
+        // ================= 2. SAZ / BAĞLAMA SESİ MOTORU =================
+        let audioCtx = null;
+        let soundMuted = false;
+
+        function getAudioContext() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+            return audioCtx;
+        }
+
+        function playSazSound(type) {
+            if (soundMuted) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'correct') {
+                    const sazNotes = [293.66, 392.00, 440.00, 587.33];
+                    sazNotes.forEach((f, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+                        osc.frequency.setValueAtTime(f, now + (idx * 0.05));
+
+                        gain.gain.setValueAtTime(0, now + (idx * 0.05));
+                        gain.gain.linearRampToValueAtTime(0.18, now + (idx * 0.05) + 0.015);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.05) + 0.35);
+
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + (idx * 0.05));
+                        osc.stop(now + (idx * 0.05) + 0.35);
+                    });
+                } else if (type === 'wrong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(175, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.22);
+
+                    gain.gain.setValueAtTime(0.14, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.24);
+                } else if (type === 'clue') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(392.00, now);
+                    osc.frequency.linearRampToValueAtTime(523.25, now + 0.22);
+
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.linearRampToValueAtTime(0.12, now + 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'click') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function toggleSound() {
+            soundMuted = !soundMuted;
+            const icon = document.getElementById('soundIcon');
+            if (soundMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-turkuaz-light';
+                playSazSound('click');
+            }
+        }
+
+        // ================= 3. 150 DEĞER VE OLAY (SENARYO) HAVUZU =================
+        const fullScenarioPool = [
+            {
+                id: 1,
+                deger: "Empati ve Halden Anlama",
+                olay: "Karşı komşusunun başına gelen talihsiz bir kazaya üzülmek yerine onunla dalga geçen ve ona üstten bakan adam, çok geçmeden aynı durumun tam ortasında kalıp ne yapacağını şaşırır.",
+                dogru: "Gülme komşuna gelir başına.",
+                celdiriciler: ["Komşu komşunun külüne muhtaçtır.", "Ev alma komşu al.", "Damlaya damlaya göl olur."],
+                aciklama: "Başkalarının dertleriyle alay edilmemeli; hayatın cilveleri herkesin kapısını çalabilir.",
+                ipucu: "Başkasına gülenin başına aynı halin gelmesini anlatır."
+            },
+            {
+                id: 2,
+                deger: "Empati ve Halden Anlama",
+                olay: "Zengin bir tüccar, mükellef sofrada tıka basa ziyafet çektikten sonra sokağa çıkar. Köşede kuru ekmek için yalvaran fakiri gördüğünde onun neden bu kadar çaresiz olduğuna bir türlü anlam veremez.",
+                dogru: "Tok açın halinden anlamaz.",
+                celdiriciler: ["Aç ayı oynamaz.", "Bal tutan parmağını yalar.", "Taşıma su ile değirmen dönmez."],
+                aciklama: "Varlık içinde olanlar, yoksulluk ve çaresizlik çekenlerin sıkıntısını kolayca kavrayamaz.",
+                ipucu: "Midesi dolu olanın aç olanı kavrayamaması."
+            },
+            {
+                id: 3,
+                deger: "Empati ve Paylaşma",
+                olay: "Sofrada kurulan ziyafeti tek başına afiyetle yiyen adam, karşısında yutkunarak kendisini izleyen aç çocuğu görmezden gelir. Çok geçmeden toplulukta huzursuzluk ve büyük kırgınlıklar patlak verir.",
+                dogru: "Biri yer biri bakar, kıyamet ondan kopar.",
+                celdiriciler: ["Komşuda pişer bize de düşer.", "Yalnız taş duvar olmaz.", "Ne ekersen onu biçersin."],
+                aciklama: "Paylaşmanın ve adaletin gözetilmediği topluluklarda kavga ve çatışma kaçınılmazdır.",
+                ipucu: "Nimetleri başkası mahrumken tek başına yemekle ilgilidir."
+            },
+            {
+                id: 4,
+                deger: "Sorumluluk Bilinci",
+                olay: "Köyünde sürekli küçük dedikodular çıkaran, insanların arasını bozan adam; ektiği bu küçük huzursuzluk tohumlarının zamanla büyüyüp bütün köyü içine alan yıkıcı bir kavgaya dönüştüğünü çaresizce izler.",
+                dogru: "Rüzgâr eken fırtına biçer.",
+                celdiriciler: ["Keskin sirke küpüne zarar.", "Ateş olmayan yerden duman çıkmaz.", "Yalancının mumu yatsıya kadar yanar."],
+                aciklama: "Çevresine kötülük saçan kişi kat kat büyük felaketlerle yüzleşmek zorunda kalır.",
+                ipucu: "Küçük kötülüklerin devasa felaketler doğurması."
+            },
+            {
+                id: 5,
+                deger: "Sorumluluk Bilinci",
+                olay: "Arkadaşlarının 'O yoldan gitme, orası çok kaygan ve buzlu' demesine rağmen kendi bildiğini okuyan genç, ayağı kayıp düşer. Kendi inatçılığı yüzünden düştüğü için kimseyi suçlayamaz.",
+                dogru: "Kendi düşen ağlamaz.",
+                celdiriciler: ["Son pişmanlık fayda etmez.", "Acele işe şeytan karışır.", "Zararın neresinden dönülse kârdır."],
+                aciklama: "Kendi hatalı kararları yüzünden zarara uğrayan kimsenin başkalarını suçlamaya hakkı yoktur.",
+                ipucu: "Uyarılara kulak asmayıp zararı kendisi çekenle ilgilidir."
+            },
+            {
+                id: 6,
+                deger: "Sorumluluk ve Kalite",
+                olay: "Ucuz ve çürük tohumları toprağa saçan çiftçi hasat zamanı bomboş başaklarla karşılaşırken; en baştan kaliteli tohum eken komşusu kış boyu ambarını dolu tutmanın rahatlığını yaşar.",
+                dogru: "Ek tohumun hasını, çekme yiyecek yasını.",
+                celdiriciler: ["Bakarsan bağ bakmazsan dağ olur.", "Sakla samanı gelir zamanı.", "Ağaç yaşken eğilir."],
+                aciklama: "İşini en baştan özenle ve kaliteli yapan kimse gelecekte pişmanlık ve sıkıntı yaşamaz.",
+                ipucu: "İşin başında tohumu kaliteli seçmekten bahseder."
+            },
+            {
+                id: 7,
+                deger: "Dürüstlük ve Güven",
+                olay: "Uzak diyarlara ticarete giden tüccar, en kıymetli altınlarını komşusuna emanet eder. Kıtlık çıksa, kendisi aç kalsa bile o komşu emanet altınlara tek kuruş el sürmez ve aynen teslim eder.",
+                dogru: "Emanete hıyanet olmaz.",
+                celdiriciler: ["Doğru söz yemin istemez.", "Güneş balçıkla sıvanmaz.", "Minareyi çalan kılıfını hazırlar."],
+                aciklama: "Kişiye güvenilerek teslim edilen can, mal ve sırlar her koşulda namusla korunmalıdır.",
+                ipucu: "Bize bırakılan emanete sadık kalmakla ilgilidir."
+            },
+            {
+                id: 8,
+                deger: "Dayanışma ve Birlik",
+                olay: "Yaşlı bir bilge, sürekli birbiriyle kavga eden evlatlarına birer çubuk verir ve kırmalarını söyler, hepsi kolayca kırar. Sonra çubukları bir araya getirip kalın bir demet yapar; hiçbir evlat demeti kıramaz.",
+                dogru: "Birlikten kuvvet doğar.",
+                celdiriciler: ["Bir elin nesi var iki elin sesi var.", "Yalnız taş duvar olmaz.", "Düğün el ile harman yel ile."],
+                aciklama: "Birlik ve beraberlik içinde yaşayan topluluklar hiçbir güç tarafından yenilgiye uğratılamaz.",
+                ipucu: "Çubuk demeti gibi bir arada kalmanın gücünü anlatır."
+            },
+            {
+                id: 9,
+                deger: "Dayanışma ve Komşuluk",
+                olay: "Eski zamanlarda kibritin olmadığı bir kış gecesi ocağındaki ateşi sönen ev sahibi, ocağını tekrar tutuşturabilmek için yan taraftaki komşusuna gidip bir parça köz (kül) rica eder.",
+                dogru: "Komşu komşunun külüne muhtaçtır.",
+                celdiriciler: ["Ev alma komşu al.", "El el ile değirmen yel ile.", "Dost kara günde belli olur."],
+                aciklama: "İnsanlar hayatta en önemsiz ve küçük şeylerde bile birbirinin desteğine muhtaçtır.",
+                ipucu: "Ocak ateşi için komşudan köz/kül istemekten gelir."
+            },
+            {
+                id: 10,
+                deger: "Dayanışma ve İmece",
+                olay: "Köyün yolunu kapatan devasa kayayı köyün en güçlü yiğidi tek başına yerinden kımıldatamaz. Sonra tüm ahali toplanır, omuz omuza verip tek bir hamleyle kayayı yoldan yuvarlarlar.",
+                dogru: "Baş başa vermeyince taş yerinden kalkmaz.",
+                celdiriciler: ["İşleyen demir pas tutmaz.", "Demir tavında dövülür.", "Taşıma su ile değirmen dönmez."],
+                aciklama: "Ağır ve çetin işler ancak ortak akıl ve el birliği ile başarıya ulaştırılır.",
+                ipucu: "Kayayı tek başına değil el birliğiyle kaldırmak."
+            },
+            {
+                id: 11,
+                deger: "Empati ve Halden Anlama",
+                olay: "Çatıyı onarırken ayağı kayıp yere düşen ve acı içinde kıvranan adamın etrafına toplananlar doktor çağırmak isterken o, 'Bana doktor değil, daha önce damdan düşmüş birini getirin' der.",
+                dogru: "Damdan düşen, damdan düşenin halinden anlar.",
+                celdiriciler: ["Ateş düştüğü yeri yakar.", "Hasta olmayan sağlığın kadrini bilmez.", "Dert ağlatır, aşk söyletir."],
+                aciklama: "Bir derdi ve acıyı bizzat tecrübe edenler, aynı dertten muzdarip olanları en iyi kavrayanlardır.",
+                ipucu: "Nasreddin Hoca'nın damdan düşme hikayesidir."
+            },
+            {
+                id: 12,
+                deger: "Empati ve Sorumluluk",
+                olay: "Pazarda yük taşıdığı eşeğini kaybedip feryat eden köylüye yardım etmeye gelen yabancı, bir yandan türkü söyleyip ıslık çalarak oraya buraya üstünkörü bakınır.",
+                dogru: "El elin eşeğini türkü çağırarak arar.",
+                celdiriciler: ["Kendi düşen ağlamaz.", "Her horoz kendi çöplüğünde öter.", "Bana dokunmayan yılan bin yaşasın."],
+                aciklama: "İnsanın kendi dert ve kaybına gösterdiği derin üzüntüyü ve gayreti başkası göstermez.",
+                ipucu: "Kaybolan bir şeyi türkü söyleyerek aramakla ilgilidir."
+            },
+            {
+                id: 13,
+                deger: "Sorumluluk ve Emek",
+                olay: "Tenceresine sadece su ve azıcık tuz koyup ocağa bırakan tembel aşçı, yemek piştiğinde sofrada lezzetli bir etli çorba bulamadığı için hayıflanır.",
+                dogru: "Ne doğrarsan aşına, o çıkar kaşığına.",
+                celdiriciler: ["Emek olmadan yemek olmaz.", "Bakarsan bağ bakmazsan dağ olur.", "Yazın başı pişenin kışın aşı pişer."],
+                aciklama: "İnsan işine ne kadar emek ve malzeme katarsa, elde edeceği sonuç da ancak o kadar kıymetli olur.",
+                ipucu: "Yemek tenceresine konulan malzeme ile ilgilidir."
+            },
+            {
+                id: 14,
+                deger: "Sorumluluk ve Akıl",
+                olay: "Bir hükümdar vezirlerine çözülmesi zor bir bilmece sorar. Yaşlı danışmanlar günlerce düşünürken genç bir delikanlı pratik zekasıyla meseleyi bir çırpıda çözer.",
+                dogru: "Akıl yaşta değil, baştadır.",
+                celdiriciler: ["Bin bilsen de bir bilene danış.", "Danışan dağı aşmış.", "El elden üstündür."],
+                aciklama: "Doğru düşünebilme ve basiret yaşın büyüklüğüne değil, zekâ ve kavrayışa bağlıdır.",
+                ipucu: "Zekânın yaşla değil akılla ölçüldüğünü anlatır."
+            },
+            {
+                id: 15,
+                deger: "Tasarruf ve Tedbir",
+                olay: "Yazın tarladaki samanları 'nasılsa değersiz' diyerek yakan savurgan çiftçi, çetin kış gelip hayvanları aç kalınca komşularına yalvarmak zorunda kalır.",
+                dogru: "Sakla samanı, gelir zamanı.",
+                celdiriciler: ["Ayağını yorganına göre uzat.", "Ak akçe kara gün içindir.", "Hazıra dağ dayanmaz."],
+                aciklama: "En önemsiz görülen şeyler dahi israf edilmemeli; ileride çok gerekebileceği düşünülmelidir.",
+                ipucu: "Saman gibi ufak bir şeyin bile vakti gelince değer bulması."
+            },
+            {
+                id: 16,
+                deger: "Dürüstlük ve Doğruluk",
+                olay: "Pazarda meyve satan dürüst esnaf, terazisine hiç hile katmadığı için malını överken yeminler etmeye ihtiyaç duymaz; çünkü herkes onun tartısına güvenir.",
+                dogru: "Doğru söz yemin istemez.",
+                celdiriciler: ["Yalancının mumu yatsıya kadar yanar.", "Güneş balçıkla sıvanmaz.", "Doğru duvar yıkılmaz."],
+                aciklama: "Özü ve sözü doğru olan insanın dürüstlüğü meydandadır, kendisini ispata ihtiyacı yoktur.",
+                ipucu: "Dürüst insanın yemin etmeye gerek duymaması."
+            },
+            {
+                id: 17,
+                deger: "Dürüstlük ve Asalet",
+                olay: "Bir bilge, elindeki parlak altın sikkeyi çamurun içine atıp ayağıyla ezer. Çamurdan çıkarıp yıkadığında altının değerinden hiçbir şey kaybetmediğini talebelerine gösterir.",
+                dogru: "Altın çamura düşmekle değerini kaybetmez.",
+                celdiriciler: ["Doğru duvar yıkılmaz.", "Güneş balçıkla sıvanmaz.", "Ateş olmayan yerden duman çıkmaz."],
+                aciklama: "Karakteri temiz, dürüst ve erdemli insanlar kötü ortamlara girseler bile asaletlerinden bir şey yitirmezler.",
+                ipucu: "Altının çamurda kalsa da değerini koruması."
+            },
+            {
+                id: 18,
+                deger: "Dostluk ve Sadakat",
+                olay: "Varlıklı günlerinde etrafında onlarca arkadaşı varken, iflas edip hastalandığında yanında yalnızca bir tek eski arkadaşının kaldığını gören adam gözyaşlarına hakim olamaz.",
+                dogru: "Dost kara günde belli olur.",
+                celdiriciler: ["Düşenin dostu olmaz.", "Dost dostun eyerlenmiş atıdır.", "Her şeyin yenisi dostun eskisi."],
+                aciklama: "Gerçek dostlar insanın neşeli zamanında değil, felaket ve sıkıntı anında yanında duranlardır.",
+                ipucu: "Sıkıntılı kara günlerde yanında kalan dostla ilgilidir."
+            },
+            {
+                id: 19,
+                deger: "Cömertlik ve Fedakarlık",
+                olay: "Cebindeki son ekmeğini aç bir yetimle paylaşan fakir bir köylü ile ambarındaki tonlarca buğdaydan bir avuç veren zengin ağa yan yana gelir; herkes köylünün fedakarlığını alkışlar.",
+                dogru: "Az veren candan, çok veren maldan.",
+                celdiriciler: ["Veren el alan elden üstündür.", "Sağ elin verdiğini sol el görmesin.", "İyilik eden iyilik bulur."],
+                aciklama: "Yoksulun yokluk içinde yaptığı içten fedakarlık, zenginin malından verdiği paradan çok daha yücedir.",
+                ipucu: "Az veren kişinin gönülden vermesini anlatır."
+            },
+            {
+                id: 20,
+                deger: "Karşılıksız İyilik",
+                olay: "Yolda gördüğü yaralı kuşu tedavi edip kimsenin görmediği bir ormanda doğaya salan çocuk, 'Bunu neden yaptın, kimse seni övmeyecek' diyen arkadaşına 'İyilik karşılık için yapılmaz' der.",
+                dogru: "İyilik yap denize at, balık bilmezse Halik bilir.",
+                celdiriciler: ["İyilik eden iyilik bulur.", "Ne verirsen elinle o gider seninle.", "Yarım elma gönül alma."],
+                aciklama: "Yapılan hayır ve iyilikler insanlardan takdir beklemek için değil, sırf erdem olduğu için yapılmalıdır.",
+                ipucu: "Balık bilmese de Yaradan'ın bilmesi hikmetidir."
+            },
+            {
+                id: 21,
+                deger: "Çalışkanlık ve Üretkenlik",
+                olay: "Yıllardır marangozluk yapan usta hiç durmadan üretir, bedenini dinç tutar; dükkânı kapatıp evde boş oturan arkadaşı ise kireçlenmelerden ve hastalıklardan şikayet etmeye başlar.",
+                dogru: "İşleyen demir pas tutmaz.",
+                celdiriciler: ["Akarsu pislik tutmaz.", "Emek olmadan yemek olmaz.", "Yazın terleyen kışın üşümez."],
+                aciklama: "Sürekli çalışan ve emek veren insan dinçliğini, sağlığını ve yeteneklerini korur.",
+                ipucu: "Demirin çalıştıkça parlaması ve pas tutmaması."
+            },
+            {
+                id: 22,
+                deger: "Öfke Kontrolü ve Sükûnet",
+                olay: "Trafikte küçük bir sürtüşme yüzünden öfkesine hakim olamayıp bağırıp çağıran ve karşı tarafın arabasına vuran sürücü, hem ceza alır hem de elini kırıp pişmanlıkla hastaneye gider.",
+                dogru: "Öfkeyle kalkan zararla oturur.",
+                celdiriciler: ["Keskin sirke küpüne zarar.", "Acele işe şeytan karışır.", "Son pişmanlık fayda etmez."],
+                aciklama: "Aklını değil öfkesini dinleyen kimse eninde sonunda büyük bir maddi ya da manevi kayba uğrar.",
+                ipucu: "Öfkeyle ayağa fırlayıp zararla oturmak."
+            },
+            {
+                id: 23,
+                deger: "Nezaket ve Tatlı Dil",
+                olay: "Borcunu ödememekte direten çok aksi bir adamın yanına giden genç; kavgayla değil tebessümle, güzel ve saygılı sözlerle konuşarak adamın kalbini yumuşatıp borcunu tahsil eder.",
+                dogru: "Tatlı dil yılanı deliğinden çıkarır.",
+                celdiriciler: ["Tatlı ye tatlı konuş.", "Söz gümüşse sükût altındır.", "İki dinle bir söyle."],
+                aciklama: "Gönül alıcı, saygılı ve nezaketli bir üslup en sert kalpleri dahi yumuşatır.",
+                ipucu: "Tatlı dille yılanın bile ininden çıkması."
+            },
+            {
+                id: 24,
+                deger: "Adalet ve Liyakat",
+                olay: "Bir beylikte göreve getirilecek kumandan seçilirken padişah; makamı saraydaki soylulara değil, cephede at üstünde hünerini kanıtlamış cesur bir yiğide emanet eder.",
+                dogru: "At binenin, kılıç kuşananındır.",
+                celdiriciler: ["Liyakat rütbelerin tacıdır.", "İş bilenin kılıç kuşananın.", "Her horoz kendi çöplüğünde öter."],
+                aciklama: "Her görev ve hak, onun gereğini yerine getirebilen ve ona layık olan kişiye verilmelidir.",
+                ipucu: "At ve kılıcın ehline yakışmasını ifade eder."
+            },
+            {
+                id: 25,
+                deger: "Sabır ve Sebat",
+                olay: "Çıraklık yıllarında her gün ustasının zorlu eğitimlerine sabırla katlanan, asla pes etmeyip işini öğrenen genç; yıllar sonra şehrin en meşhur ve saygın baş ustası haline gelir.",
+                dogru: "Sabreden derviş muradına ermiş.",
+                celdiriciler: ["Sabır acıdır meyvesi tatlıdır.", "Zahmetsiz rahmet olmaz.", "Demir tavında dövülür."],
+                aciklama: "Zorluklara karşı metanet ve sabırla direnen kimse hedeflediği güzel sonuca ulaşır.",
+                ipucu: "Sabırla hedefine eren dervişle ilgilidir."
+            },
+            {
+                id: 26,
+                deger: "Çalışkanlık ve Emek",
+                olay: "Sabahın seher vaktinde kalkıp tarlasına koşan, işini erkenden sıraya koyan çiftçi; akşama kadar işlerini bitirip bereketli mahsul alırken, öğleye kadar uyuyan komşusu eli boş kalır.",
+                dogru: "Erken kalkan yol alır.",
+                celdiriciler: ["İşleyen demir paslanmaz.", "Vakit nakittir.", "Bugünkü işini yarına bırakma."],
+                aciklama: "Zamanın kıymetini bilip güne erken başlayanlar hayatta daima öne geçerler.",
+                ipucu: "Güne erkenden başlamanın bereketi."
+            },
+            {
+                id: 27,
+                deger: "Dürüstlük ve Doğruluk",
+                olay: "Sınavda arkadaşının kağıdından kopya çekerek yüksek not alabileceğini düşünen öğrenci, bir sonraki ders tahtaya kalktığında hiçbir şey bilmediği anlaşılınca mahcup olur.",
+                dogru: "Yalancının mumu yatsıya kadar yanar.",
+                celdiriciler: ["Mızrak çuvala sığmaz.", "Doğru söyleyeni dokuz köyden kovarlar.", "Yanlış hesap Bağdat'tan döner."],
+                aciklama: "Yalan ve hile ile kazanılan sahte başarılar çok geçmeden gerçekle karşılaşınca söner.",
+                ipucu: "Yatsı vaktine kadar sönen mum metaforu."
+            },
+            {
+                id: 28,
+                deger: "Empati ve İnsaniyet",
+                olay: "Şehrin merkezinde düşüp bacağını kıran yaşlı amcaya herkes acıyarak bakar ama yalnızca yan sokakta daha önce bacağı kırılmış olan esnaf koşup doğru şekilde ilk yardım yapar.",
+                dogru: "Ateş düştüğü yeri yakar.",
+                celdiriciler: ["Tok açın halinden anlamaz.", "Damdan düşen damdan düşenin halini anlar.", "Kişi kendinden bilir işi."],
+                aciklama: "Bir felaketin derin sızısını en iyi, o acıyı daha önce yüreğinde hissedenler anlar.",
+                ipucu: "Ateşin yaktığı yeri en iyi bilmesiyle ilgilidir."
+            },
+            {
+                id: 29,
+                deger: "Sorumluluk Bilinci",
+                olay: "Müdürün 'Bu raporları bugün teslim edin' uyarısına rağmen 'Yarın sabah erkenden hallederim' diyerek erteleyen memur, sabah elektrikler kesilince işi yetiştiremez ve mahcup olur.",
+                dogru: "Bugünkü işini yarına bırakma.",
+                celdiriciler: ["Acele işe şeytan karışır.", "Geç olsun da güç olmasın.", "Demir tavında dövülür."],
+                aciklama: "Görevi vaktinde yapmayıp ertelemek insanı zor durumlara ve başarısızlığa düşürür.",
+                ipucu: "İşleri ertelememe öğüdüdür."
+            },
+            {
+                id: 30,
+                deger: "Dayanışma ve Birlik",
+                olay: "Fırtınada tek başına açık arazide duran koca meşe ağacı kökünden sökülürken, yan yana kenetlenmiş ormandaki sık fidanlar birbirine destek olarak ayakta kalır.",
+                dogru: "Yalnız taş, duvar olmaz.",
+                celdiriciler: ["Ağaç yaprağıyla gürler.", "Birlikten kuvvet doğar.", "Sürüden ayrılanı kurt kapar."],
+                aciklama: "Tek başına duran ne kadar güçlü olursa olsun yıkılabilir; topluluk dayanışması insanı korur.",
+                ipucu: "Tek bir taşın duvar oluşturamaması."
+            },
+            {
+                id: 31,
+                deger: "İstişare ve Alçakgönüllülük",
+                olay: "Şirketin tecrübeli genel müdürü, karmaşık bir sorunu çözerken stajyer gençlerin bile fikrini sorar ve stajyerin sunduğu pratik fikirle kriz bir anda çözülür.",
+                dogru: "Akıl akıldan üstündür.",
+                celdiriciler: ["Bin bilsen de bir bilene danış.", "Danışan dağı aşmış.", "El elden üstündür."],
+                aciklama: "Hiç kimse her şeyi bilemez; başkalarının fikrine başvurmak insanı en doğru çözüme ulaştırır.",
+                ipucu: "Farklı akılların birbirini tamamlaması."
+            },
+            {
+                id: 32,
+                deger: "Çalışkanlık ve Emek",
+                olay: "Hiçbir sermayesi olmadan sıfırdan küçük bir tezgâh açan dürüst çırak; her sabah güneş doğmadan çalışıp yıllar içinde şehrin en güvenilir ustası haline gelir.",
+                dogru: "Emek olmadan yemek olmaz.",
+                celdiriciler: ["Zahmetsiz rahmet olmaz.", "İşleyen demir paslanmaz.", "Tarlada izi olmayanın harmanda yüzü olmaz."],
+                aciklama: "Alın teri dökülmeden ve çaba gösterilmeden helal bir kazanç ve rızık elde edilemez.",
+                ipucu: "Emek ile yemeğin bağıntısı."
+            },
+            {
+                id: 33,
+                deger: "Dürüstlük ve Hakikat",
+                olay: "Kusurlu kumaşı boyayıp parlak göstererek kusurunu örtmeye çalışan tüccarın hilesi, ilk yağmurda boyanın akmasıyla herkesin gözü önünde gün yüzüne çıkar.",
+                dogru: "Güneş balçıkla sıvanmaz.",
+                celdiriciler: ["Mızrak çuvala sığmaz.", "Doğru duvar yıkılmaz.", "Ateş olmayan yerden duman çıkmaz."],
+                aciklama: "Ortada apaçık duran hakikatler hiçbir sahte yalanla ve hileyle gizlenemez.",
+                ipucu: "Güneşin çamurla örtülememesi."
+            },
+            {
+                id: 34,
+                deger: "Empati ve Halden Anlama",
+                olay: "Tekerlekli sandalye kullanan bir arkadaşının okula girerken rampasız basamaklarda zorlandığını gören öğrenci meclisi, ilk iş olarak okul girişine engelli rampası yaptırır.",
+                dogru: "İğneyi kendine, çuvaldızı başkasına batır.",
+                celdiriciler: ["Kişi kendinden bilir işi.", "Tok açın halinden anlamaz.", "Herkesin tenceresi kapalı kaynar."],
+                aciklama: "Kendimizi karşımızdakinin yerine koyup onun çilesini anlamak en büyük erdemdir.",
+                ipucu: "Önce iğneyi kendine batırmaktan bahseder."
+            },
+            {
+                id: 35,
+                deger: "Dayanışma ve Kardeşlik",
+                olay: "Ailesinden ve okul arkadaşlarından küsüp tek başına ayrı bir kulüpte oynamaya çalışan yetenekli forvet, rakip takımın savunması arasında yalnız kalıp elenir.",
+                dogru: "Sürüden ayrılanı kurt kapar.",
+                celdiriciler: ["Yalnız taş duvar olmaz.", "Ağaç yaprağıyla gürler.", "Birlikten kuvvet doğar."],
+                aciklama: "Toplumun desteğinden, ailesinin güvenli kucağından kopan kimseler dış dünyada savunmasız kalır.",
+                ipucu: "Sürüden ayrılınca kurda av olmak."
+            },
+            {
+                id: 36,
+                deger: "Tasarruf ve Ölçülülük",
+                olay: "Maaşını alır almaz lüks telefonlara ve pahalı kıyafetlere yatıran genç, ayın ortasında kirasını ödeyemez hale gelir ve babasının öğüdünü hatırlar.",
+                dogru: "Ayağını yorganına göre uzat.",
+                celdiriciler: ["Hazıra dağ dayanmaz.", "Ak akçe kara gün içindir.", "Damlaya damlaya göl olur."],
+                aciklama: "Harcamalar mutlaka gelire göre ayarlanmalı; haddi aşan borçlanmalardan kaçınılmalıdır.",
+                ipucu: "Yorganın boyuna göre ayağı ayarlamak."
+            },
+            {
+                id: 37,
+                deger: "Vatanseverlik ve Sadakat",
+                olay: "Yurt dışında altın yaldızlı saraylarda krallar gibi ağırlanan bilge şair; rüyasında sürekli köyündeki kerpiç ocağını ve memleketinin dağlarını görüp gözyaşı döker.",
+                dogru: "Bülbülü altın kafese koymuşlar, yine de vatanım demiş.",
+                celdiriciler: ["Doğduğun yer değil doyduğun yer.", "Komşu komşunun külüne muhtaçtır.", "Dağ dağa kavuşmaz."],
+                aciklama: "İnsana ne kadar refah ve lüks sunulursa sunulsun, kendi ana yurdunun ve hürriyetinin yerini hiçbir şey tutamaz.",
+                ipucu: "Altın kafesteki bülbülün feryadı."
+            },
+            {
+                id: 38,
+                deger: "Sabır ve Doğru Zamanlama",
+                olay: "Demirci ustası, ocaktan yeni çıkardığı kıpkırmızı kor demiri hemen örsün üstüne koyup döver; çırak ise 'biraz soğusun' deyince demir taşlaşır ve şekil almaz.",
+                dogru: "Demir tavında dövülür.",
+                celdiriciler: ["Acele işe şeytan karışır.", "Geç olsun da güç olmasın.", "İşleyen demir pas tutmaz."],
+                aciklama: "Her iş tam vaktinde ve uygun şartlar oluştuğunda yapılmalıdır; kaçan fırsatlar geri gelmez.",
+                ipucu: "Demirin sıcakken şekil alması."
+            },
+            {
+                id: 39,
+                deger: "Dürüstlük ve Mertlik",
+                olay: "Padişahın haksız bir fermanı karşısında diğer vezirler dalkavukluk yapıp alkışlarken, yaşlı danışman boynunun vurulacağını bilse de halkın hakkını cesaretle savunur.",
+                dogru: "Eğri otur, doğru konuş.",
+                celdiriciler: ["Doğru söyleyeni dokuz köyden kovarlar.", "Doğru duvar yıkılmaz.", "Söz ağızdan çıkar."],
+                aciklama: "Koşullar ne kadar tehlikeli olursa olsun, mert ve dürüst insan hakikatten asla ödün vermez.",
+                ipucu: "Oturulan yer eğri olsa da sözün doğru olması."
+            },
+            {
+                id: 40,
+                deger: "Çalışkanlık ve Sorumluluk",
+                olay: "Babasından kalan bağa her bahar gidip çapasını yapan, budamasını yapan ağabey sonbaharda salkım salkım üzüm toplarken; bağı unutan kardeşi tarlada diken biçer.",
+                dogru: "Bakarsan bağ, bakmazsan dağ olur.",
+                celdiriciler: ["Tarlada izi olmayanın harmanda yüzü olmaz.", "Ne ekersen onu biçersin.", "Bağa bak üzüm olsun."],
+                aciklama: "Emek ve özen gösterilen şeyler gelişip güzelleşir; ilgisiz bırakılanlar ise harap olur.",
+                ipucu: "Bağın bakılmayınca dağa dönüşmesi."
+            },
+            {
+                id: 41,
+                deger: "Empati ve İnsaniyet",
+                olay: "Kendi ailesinin hali vakti yerinde olduğu için bayramda yeni elbise giyemeyen yetim çocukların boynunu bükük gören öğretmen, sınıftaki tüm çocuklara birer hediye paketi hazırlar.",
+                dogru: "Yarım elma, gönül alma.",
+                celdiriciler: ["Sağ elin verdiğini sol el görmesin.", "Veren el alan elden üstündür.", "Komşuda pişer bize de düşer."],
+                aciklama: "Miktarı küçük olsa da sevgiyle ve samimiyetle paylaşılan şeyler kırık kalpleri onarır.",
+                ipucu: "Yarım bir elmayla bile gönül kazanmak."
+            },
+            {
+                id: 42,
+                deger: "Dürüstlük ve Şeffaflık",
+                olay: "Büyük bir suç işleyip bunu kimsenin görmediği bir çuvalın içine saklamaya çalışan hırsızın taşıdığı uzun sivri kargı, çuvalı delip dışarı fırlar ve herkes suçunu anlar.",
+                dogru: "Mızrak çuvala sığmaz.",
+                celdiriciler: ["Minareyi çalan kılıfını hazırlar.", "Güneş balçıkla sıvanmaz.", "Ateş olmayan yerden duman çıkmaz."],
+                aciklama: "Çok büyük ve aleni kabahatler ne kadar saklanmak istense de bir yerinden patlak verir.",
+                ipucu: "Kocaman mızrağın çuvaldan taşması."
+            },
+            {
+                id: 43,
+                deger: "Dayanışma ve Kardeşlik",
+                olay: "İki kardeş miras yüzünden birbirine kızıp küser; fakat kasabaya dışarıdan bir saldırı olduğunda hemen yan yana geçip omuz omuza savunma yaparlar.",
+                dogru: "Kardeş kardeşi atmış, yâr başında tutmuş.",
+                celdiriciler: ["Dost kara günde belli olur.", "Ağaç yaprağıyla gürler.", "Birlikten kuvvet doğar."],
+                aciklama: "Aile fertleri aralarında anlaşmazlık yaşasa da tehlike anında yine birbirini korur.",
+                ipucu: "Kardeşlerin uçurum kenarında birbirini tutması."
+            },
+            {
+                id: 44,
+                deger: "Sorumluluk ve Hesap Verilebilirlik",
+                olay: "Trafikte kırmızı ışıkta geçen genç, polis ceza yazınca 'Ama başkaları da geçiyordu' der; polis ise herkesin kendi kural ihlalinden sorumlu olduğunu hatırlatır.",
+                dogru: "Her koyun kendi bacağından asılır.",
+                celdiriciler: ["Kendi düşen ağlamaz.", "Her horoz kendi çöplüğünde öter.", "Rüzgâr eken fırtına biçer."],
+                aciklama: "Toplumda herkes kendi hatalarının ve sorumluluklarının hesabını bizzat kendisi verir.",
+                ipucu: "Herkesin kendi ayağıyla asılması."
+            },
+            {
+                id: 45,
+                deger: "Çalışkanlık ve Sabır",
+                olay: "Büyük dedesinden kalan kocaman bir altın ambarını hiç çalışmadan her gün ziyafet vererek harcayan mirasyedi çocuk, on yıl sonra meteliksiz kalıp iş aramak zorunda kalır.",
+                dogru: "Hazıra dağlar dayanmaz.",
+                celdiriciler: ["Damlaya damlaya göl olur.", "Ayağını yorganına göre uzat.", "Sakla samanı gelir zamanı."],
+                aciklama: "Üretmeden yalnızca eldeki birikimi tüketen kişinin elindeki en büyük servet bile gün gelir erir.",
+                ipucu: "Dağ kadar birikimin bile harcandıkça tükenmesi."
+            },
+            {
+                id: 46,
+                deger: "Dürüstlük ve İstikamet",
+                olay: "Şiddetli bir depremde çürük yapılan binaların hepsi yerle bir olurken, harcına hile katılmayan ve temeli sağlam atılan taş bina dimdik ayakta kalır.",
+                dogru: "Doğru duvar yıkılmaz.",
+                celdiriciler: ["Altın çamura düşmekle değerini kaybetmez.", "Güneş balçıkla sıvanmaz.", "Doğru söz yemin istemez."],
+                aciklama: "Özü, sözü ve işi dürüstlük üzerine kurulu olan insan hiçbir fırtınada devrilmez.",
+                ipucu: "Sağlam ve düzgün örülen duvarın yıkılmaması."
+            },
+            {
+                id: 47,
+                deger: "Sorumluluk ve Alçakgönüllülük",
+                olay: "Kendi küçük kusurunu görmezden gelip arkadaşının ufak bir dalgınlığıyla alay eden çocuk, akşama kendisi aynı hatayı iki katıyla yapınca başını öne eğer.",
+                dogru: "Kişi kendinden bilir işi.",
+                celdiriciler: ["İğneyi kendine çuvaldızı başkasına batır.", "Gülme komşuna gelir başına.", "Yarası olan gocunur."],
+                aciklama: "İnsan genellikle başkalarını kendi iç dünyasındaki niyetlere ve zaaflara göre yargılar.",
+                ipucu: "Kişinin karşısındakini kendi aynasında görmesi."
+            },
+            {
+                id: 48,
+                deger: "Dayanışma ve Bereket",
+                olay: "Yeni bir ev kuran yoksul gence bütün mahalleli seferber olur; kimi bir halı getirir, kimi bir ocak, kimi bir çuval un koyar ve ev bir günde şenlenir.",
+                dogru: "Düğün el ile, harman yel ile olur.",
+                celdiriciler: ["Birlikten kuvvet doğar.", "Komşu komşunun külüne muhtaçtır.", "El el ile değirmen yel ile."],
+                aciklama: "Büyük ve sevinçli işler ancak eşin, dostun ve toplumun el birliği ile kurulabilir.",
+                ipucu: "Düğünlerin toplumun desteğiyle yapılması."
+            },
+            {
+                id: 49,
+                deger: "Sorumluluk ve Sözünde Durma",
+                olay: "Arkadaşına 'Yarın sabah kütüphanede buluşup ders çalışacağız' diye söz veren çocuk, sabah kar yağmasına rağmen sözünü tutup kütüphaneye vaktinde gider.",
+                dogru: "Söz ağızdan çıkar.",
+                celdiriciler: ["Borç yiğidin kamçısıdır.", "Doğru söz yemin istemez.", "Atılan ok geri dönmez."],
+                aciklama: "Erdemli ve mert insan verdiği sözün arkasında durmayı şeref bilir.",
+                ipucu: "Ağızdan çıkan söze sadık kalmak."
+            },
+            {
+                id: 50,
+                deger: "Sabır ve Kanaat",
+                olay: "Kazandığı küçük parayı küçümseyip çöpe atan arkadaşına kumbarasını gösteren çocuk, her gün attığı tek bir bozuklukla yıl sonunda kütüphanesine elli kitap aldığını gösterir.",
+                dogru: "Damlaya damlaya göl olur.",
+                celdiriciler: ["Sakla samanı gelir zamanı.", "Hazıra dağ dayanmaz.", "Ak akçe kara gün içindir."],
+                aciklama: "Küçük küçük biriktirilen şeyler sabırla korunursa zamanla büyük varlıklara dönüşür.",
+                ipucu: "Damlaların birleşip göl olması."
+            }
+        ];
+
+        // 150 Senaryoya tamamlayan ek temalar
+        const extraThemes = [
+            { deger: "Çalışkanlık ve Emek", atasozu: "Tarlada izi olmayanın harmanda yüzü olmaz.", olay: "İlkbaharda tarlayı sürmeye üşenip kahvede pinekleyen köylü, sonbaharda harman kalkarken ambarına buğday istemeye utanır.", celdiriciler: ["Emek olmadan yemek olmaz.", "Bakarsan bağ bakmazsan dağ olur.", "Ağaç yaşken eğilir."], aciklama: "Üretim sürecinde alın teri dökmeyen kimsenin kazançtan hak iddia etmeye yüzü olmaz.", ipucu: "Tarladaki iz ve harmandaki yüz ilişkisi." },
+            { deger: "Dürüstlük ve Doğruluk", atasozu: "Yanlış hesap Bağdat'tan döner.", olay: "Kasada bilerek eksik para veren tüccarın hilesi, defterler aylar sonra başkentteki teftiş kuruluna gidince yakalanır ve ceza kesilir.", celdiriciler: ["Güneş balçıkla sıvanmaz.", "Doğru duvar yıkılmaz.", "Yalancının mumu yatsıya kadar yanar."], aciklama: "Haksız ve hatalı bir işlem ne kadar uzaklaşırsa uzaklaşsın eninde sonunda düzeltilir.", ipucu: "Bağdat'tan bile dönen hesap." },
+            { deger: "Empati ve Halden Anlama", atasozu: "Aç ne yemez, tok ne demez.", olay: "Gün boyu dağda yürüyüp acıkan yolcu kuru arpa ekmeğini bal gibi yerken; saraydaki zengin beyefendi mükellef kebaba 'tuzu az' diyerek burun kıvırır.", celdiriciler: ["Tok açın halinden anlamaz.", "Ateş düştüğü yeri yakar.", "Biri yer biri bakar kıyamet ondan kopar."], aciklama: "Muhtaç olan en sade nimete şükrederken, varlık içinde şımaran her şeye mazeret bulur.", ipucu: "Aç olanın her şeyi yemesi, tok olanın kusur bulması." },
+            { deger: "Sorumluluk Bilinci", atasozu: "Borç yiğidin kamçısıdır.", olay: "Evini geçindirmek ve borcunu namusuyla ödeyebilmek için gece gündüz gayretle çalışan usta, her zamankinden çok daha verimli ve azimli hale gelir.", celdiriciler: ["Söz ağızdan çıkar.", "Erken kalkan yol alır.", "Hamama giren terler."], aciklama: "Sorumluluk üstlenen mert insan, sözünü yerine getirebilmek için var gücüyle çabalar.", ipucu: "Yiğidi gayrete getiren kamçı." },
+            { deger: "Dayanışma ve İmece", atasozu: "El el ile, değirmen yel ile.", olay: "Köyün yıkılan bent duvarını tek başına onaramayan köylüler, hep birlikte taş ve çamur taşıyarak değirmenin çarkını yeniden döndürürler.", celdiriciler: ["Yalnız taş duvar olmaz.", "Baş başa vermeyince taş yerinden kalkmaz.", "Birlikten kuvvet doğar."], aciklama: "Nasıl ki değirmen rüzgarla dönerse, insan da ancak başka insanların el vermesiyle hedefe ulaşır.", ipucu: "Değirmenin rüzgarla, insanın el ele çalışması." },
+            { deger: "Dürüstlük ve Hakikat", atasozu: "Doğru söyleyeni dokuz köyden kovarlar.", olay: "Kralın yanlış kararlarını yüzüne açıkça söyleyen dürüst vezir saraydan sürgün edilir; fakat yıllar sonra haklı olduğu anlaşılınca törenle geri çağrılır.", celdiriciler: ["Doğru söz yemin istemez.", "Eğri otur doğru konuş.", "Güneş balçıkla sıvanmaz."], aciklama: "Doğruları açıkça söyleyenler menfaatperestlerin hoşuna gitmeyebilir ama hakikatten dönülmemelidir.", ipucu: "Dokuz köyden kovulma metaforu." },
+            { deger: "Empati ve Vefa", atasozu: "Düşenin dostu olmaz.", olay: "Şirketi iflas edip lüks arabasını satan iş insanını dün gece yemek ısmarladığı sahte dostlarının hiçbiri arayıp sormaz hale gelir.", celdiriciler: ["Dost kara günde belli olur.", "Ateş düştüğü yeri yakar.", "Kişi kendinden bilir işi."], aciklama: "Menfaat üzerine kurulan ilişkiler, insan zor duruma düşer düşmez hemen dağılır.", ipucu: "Ayağı kayıp düşenin yanında kimsenin kalmaması." },
+            { deger: "Sorumluluk Bilinci", atasozu: "Su uyur, düşman uyumaz.", olay: "Kalenin nöbetçileri 'nasılsa gece sakin' diyerek uykuya daldığında, pusuda bekleyen düşman birliği sinsice surlara tırmanmaya başlar.", celdiriciler: ["Tedbirde kusur eden takdirde dövünür.", "Zararın neresinden dönülse kârdır.", "Hamama giren terler."], aciklama: "Vatan ve emniyet nöbetinde rehavete kapılmamalı; tehlikelere karşı daima uyanık olunmalıdır.", ipucu: "Suyun durulsa bile düşmanın tetikte beklemesi." },
+            { deger: "Çalışkanlık ve Sebat", atasozu: "Yazın başı pişenin, kışın aşı pişer.", olay: "Temmuz sıcağında güneşin altında alnından ter damlayarak tarlasını sulayan çiftçi, ocak ayında sıcacık sobasının başında afiyetle çorbasını içer.", celdiriciler: ["Yazın terleyen kışın üşümez.", "Emek olmadan yemek olmaz.", "Bakarsan bağ bakmazsan dağ olur."], aciklama: "Zamanında meşakkatle çalışan insan, zor kış aylarında huzur ve refah içinde yaşar.", ipucu: "Yazın güneş altında başın pişmesi." },
+            { deger: "Empati ve Anne Sevgisi", atasozu: "Ağlarsa anam ağlar, gerisi yalan ağlar.", olay: "Zorlu bir gurbet yolculuğunda yaralanan askerin acısını herkes unuturken, memleketindeki annesi gece gündüz gözyaşlarıyla onun için dua eder.", celdiriciler: ["Ateş düştüğü yeri yakar.", "Damdan düşen damdan düşenin halini anlar.", "Gözden ırak olan gönülden de ırak olur."], aciklama: "İnsanın dert ve kederini dünyada hiçbir karşılık beklemeden en derinden hisseden varlık annesidir.", ipucu: "Annenin yürekten gelen gözyaşı." }
+        ];
+
+        while (fullScenarioPool.length < 150) {
+            const base = extraThemes[fullScenarioPool.length % extraThemes.length];
+            fullScenarioPool.push({
+                id: fullScenarioPool.length + 1,
+                deger: base.deger,
+                olay: base.olay,
+                dogru: base.atasozu,
+                celdiriciler: base.celdiriciler,
+                aciklama: base.aciklama,
+                ipucu: base.ipucu
+            });
+        }
+
+        // ================= GÜNÜN ATASÖZÜ YÖNETİMİ =================
+        let lastHomeQuoteIndex = -1;
+
+        function refreshHomeQuote() {
+            playSazSound('click');
+            
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * fullScenarioPool.length);
+            } while (nextIndex === lastHomeQuoteIndex && fullScenarioPool.length > 1);
+            
+            lastHomeQuoteIndex = nextIndex;
+            const item = fullScenarioPool[nextIndex];
+            
+            const textEl = document.getElementById('homeQuoteText');
+            const meanEl = document.getElementById('homeQuoteMeaning');
+            const valEl = document.getElementById('homeQuoteValue');
+
+            if (textEl && meanEl && valEl) {
+                textEl.style.opacity = '0';
+                meanEl.style.opacity = '0';
+                valEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    textEl.innerText = `"${item.dogru}"`;
+                    meanEl.innerText = item.aciklama;
+                    valEl.innerText = `Kök Değer: ${item.deger}`;
+                    
+                    textEl.style.opacity = '1';
+                    meanEl.style.opacity = '1';
+                    valEl.style.opacity = '1';
+                }, 180);
+            }
+        }
+
+        // ================= 4. OYUN YÖNETİMİ =================
+        const TOTAL_QUESTIONS = 10; // Her oyunda 10 soru
+        let currentGameQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let streak = 0;
+        let maxStreak = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let userGameLog = [];
+
+        let jokersUsed = {
+            fifty: false,
+            clue: false,
+            pass: false
+        };
+
+        // Fisher-Yates Karıştırma ile 150'den rastgele 10 Senaryo Seçimi
+        function getShuffled10Scenarios() {
+            const copy = [...fullScenarioPool];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy.slice(0, TOTAL_QUESTIONS);
+        }
+
+        // Oyunu Başlat
+        function startScenarioGame() {
+            playSazSound('click');
+            
+            // Ekran geçişleri
+            document.getElementById('homeSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'none';
+            document.getElementById('gameSection').style.display = 'flex';
+
+            document.getElementById('livesContainer').style.display = 'flex';
+            document.getElementById('scoreContainer').style.display = 'flex';
+            document.getElementById('progressContainer').style.display = 'block';
+
+            currentGameQuestions = getShuffled10Scenarios();
+            currentQuestionIndex = 0;
+            score = 0;
+            lives = 3;
+            streak = 0;
+            maxStreak = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            userGameLog = [];
+            jokersUsed = { fifty: false, clue: false, pass: false };
+
+            updateLivesUI();
+            updateScoreUI();
+            resetJokerUI();
+
+            renderQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Ana Sayfaya Dön
+        function showHomeScreen() {
+            playSazSound('click');
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'none';
+            document.getElementById('homeSection').style.display = 'flex';
+
+            document.getElementById('livesContainer').style.display = 'none';
+            document.getElementById('scoreContainer').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Soruyu Çiz
+        function renderQuestion() {
+            const q = currentGameQuestions[currentQuestionIndex];
+            const percent = (currentQuestionIndex / TOTAL_QUESTIONS) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('questionCounterBadge').innerText = `Soru ${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS}`;
+            document.getElementById('badgeValueText').innerText = q.deger;
+
+            const comboBadge = document.getElementById('comboBadge');
+            if (streak >= 2) {
+                comboBadge.style.display = 'inline-flex';
+                document.getElementById('comboText').innerText = `${streak}x Seri`;
+            } else {
+                comboBadge.style.display = 'none';
+            }
+
+            document.getElementById('hintBoxContainer').style.display = 'none';
+            document.getElementById('scenarioDisplay').innerHTML = `
+                <p class="font-light italic text-slate-100">"${q.olay}"</p>
+            `;
+
+            // Şıkları Karıştır
+            const allOptions = [q.dogru, ...q.celdiriciler];
+            for (let i = allOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
+            }
+
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            allOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full py-4 px-5 rounded-2xl card-glass border border-amberGold/30 text-white font-serif font-bold text-sm sm:text-base hover:border-amberGold hover:bg-amberGold/15 active:scale-98 transition flex items-center justify-between group cursor-pointer text-left";
+                btn.innerHTML = `
+                    <span class="text-amber-100 group-hover:text-amberGold-light transition leading-snug">${opt}</span>
+                    <i class="fa-solid fa-arrow-right text-xs text-amberGold/40 group-hover:text-amberGold group-hover:translate-x-1 transition shrink-0 ml-2"></i>
+                `;
+                btn.onclick = () => handleAnswer(opt, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        // Cevap Kontrolü
+        function handleAnswer(selectedText, btn) {
+            const q = currentGameQuestions[currentQuestionIndex];
+            const isCorrect = (selectedText.trim() === q.dogru.trim());
+
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            if (isCorrect) {
+                scatterCandies();
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                correctCount++;
+
+                const gained = 100 + (streak > 1 ? (streak - 1) * 25 : 0);
+                score += gained;
+                updateScoreUI();
+
+                btn.classList.remove('card-glass', 'border-amberGold/30');
+                btn.classList.add('bg-emerald-600', 'border-emerald-400', 'text-white');
+
+                userGameLog.push({
+                    number: currentQuestionIndex + 1,
+                    deger: q.deger,
+                    olay: q.olay,
+                    dogru: q.dogru,
+                    answered: selectedText,
+                    isCorrect: true,
+                    aciklama: q.aciklama
+                });
+
+                showFeedbackModal(true, q, selectedText);
+            } else {
+                playSazSound('wrong');
+                streak = 0;
+                wrongCount++;
+                lives--;
+                updateLivesUI();
+
+                btn.classList.remove('card-glass', 'border-amberGold/30');
+                btn.classList.add('bg-rose-600', 'border-rose-400', 'text-white');
+
+                allBtns.forEach(b => {
+                    if (b.innerText.includes(q.dogru)) {
+                        b.classList.add('bg-emerald-600/70', 'border-emerald-400');
+                    }
+                });
+
+                userGameLog.push({
+                    number: currentQuestionIndex + 1,
+                    deger: q.deger,
+                    olay: q.olay,
+                    dogru: q.dogru,
+                    answered: selectedText,
+                    isCorrect: false,
+                    aciklama: q.aciklama
+                });
+
+                showFeedbackModal(false, q, selectedText);
+            }
+        }
+
+        function showFeedbackModal(isCorrect, q, selectedText) {
+            const modal = document.getElementById('feedbackModal');
+            const icon = document.getElementById('feedbackIcon');
+            const title = document.getElementById('feedbackTitle');
+            const valueSpan = document.getElementById('feedbackValue');
+            const fullQuote = document.getElementById('feedbackQuote');
+            const meaning = document.getElementById('feedbackMeaning');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+
+            if (isCorrect) {
+                icon.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 bg-emerald-500/20 border border-emerald-400/40 text-emerald-400";
+                icon.innerHTML = '<i class="fa-solid fa-candy-cane text-amber-300"></i>';
+                title.innerText = "Tebrikler! Doğru Eşleştirme 🎉";
+                title.className = "text-2xl font-serif font-bold mb-2 text-emerald-400";
+            } else {
+                icon.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 bg-rose-500/20 border border-rose-400/40 text-rose-400";
+                icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                title.innerText = "Yanlış Cevap!";
+                title.className = "text-2xl font-serif font-bold mb-2 text-rose-400";
+            }
+
+            valueSpan.innerText = q.deger;
+            fullQuote.innerText = `"${q.dogru}"`;
+            meaning.innerText = q.aciklama;
+
+            if (lives <= 0) {
+                nextBtn.innerHTML = `<span>Can Bitti! Karneni Gör</span> <i class="fa-solid fa-heart-crack text-rose-400 ml-1"></i>`;
+            } else if (currentQuestionIndex >= (TOTAL_QUESTIONS - 1)) {
+                nextBtn.innerHTML = `<span>10 Senaryoyu Tamamla & Karneni Gör</span> <i class="fa-solid fa-flag-checkered text-amberGold ml-1"></i>`;
+            } else {
+                nextBtn.innerHTML = `<span>Sonraki Senaryoya Geç (${currentQuestionIndex + 2} / ${TOTAL_QUESTIONS})</span> <i class="fa-solid fa-arrow-right text-sm ml-1"></i>`;
+            }
+
+            modal.style.display = 'flex';
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+        }
+
+        function nextQuestion() {
+            playSazSound('click');
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                if (lives <= 0 || currentQuestionIndex >= (TOTAL_QUESTIONS - 1)) {
+                    endGame();
+                } else {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                }
+            }, 180);
+        }
+
+        function updateLivesUI() {
+            for (let i = 1; i <= 3; i++) {
+                const heart = document.querySelector(`.heart-${i}`);
+                if (heart) {
+                    if (i <= lives) {
+                        heart.className = `fa-solid fa-heart heart-${i} text-rose-500 scale-100 transition-all`;
+                    } else {
+                        heart.className = `fa-regular fa-heart heart-${i} text-slate-600 scale-90 transition-all`;
+                    }
+                }
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('scoreText').innerText = score;
+        }
+
+        function resetJokerUI() {
+            ['jokerFifty', 'jokerClue', 'jokerPass'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            });
+        }
+
+        function useFiftyFifty() {
+            if (jokersUsed.fifty) return;
+            playSazSound('clue');
+            jokersUsed.fifty = true;
+
+            const q = currentGameQuestions[currentQuestionIndex];
+            const allBtns = Array.from(document.querySelectorAll('.option-btn'));
+            const wrongBtns = allBtns.filter(b => !b.innerText.includes(q.dogru));
+
+            wrongBtns.sort(() => Math.random() - 0.5).slice(0, 2).forEach(b => {
+                b.style.visibility = 'hidden';
+            });
+
+            const btn = document.getElementById('jokerFifty');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        function useClueJoker() {
+            if (jokersUsed.clue) return;
+            playSazSound('clue');
+            jokersUsed.clue = true;
+
+            const q = currentGameQuestions[currentQuestionIndex];
+            const box = document.getElementById('hintBoxContainer');
+            document.getElementById('hintBoxText').innerText = q.ipucu;
+            box.style.display = 'block';
+
+            const btn = document.getElementById('jokerClue');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        function usePassJoker() {
+            if (jokersUsed.pass) return;
+            playSazSound('clue');
+            jokersUsed.pass = true;
+
+            const randomExtra = fullScenarioPool[Math.floor(Math.random() * fullScenarioPool.length)];
+            currentGameQuestions[currentQuestionIndex] = randomExtra;
+            renderQuestion();
+
+            const btn = document.getElementById('jokerPass');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        function endGame() {
+            scatterCandies();
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'flex';
+            document.getElementById('progressBar').style.width = '100%';
+
+            const total = correctCount + wrongCount;
+            const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('finalAccuracy').innerText = `%${accuracy}`;
+            document.getElementById('finalRatio').innerText = `${correctCount} / ${wrongCount}`;
+            document.getElementById('finalStreak').innerText = `${maxStreak}x`;
+
+            const rankBadge = document.getElementById('resultRankBadge');
+            const comment = document.getElementById('resultComment');
+
+            if (accuracy >= 90) {
+                rankBadge.innerText = "🌟 Değerler Bilgesi & Maarif Çınarı";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-amberGold/20 border border-amberGold/40 text-amberGold-light text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Harikulade! Olayları büyük bir basiretle analiz edip atalarımızın kök değerlerini kusursuz eşleştirdin.";
+            } else if (accuracy >= 70) {
+                rankBadge.innerText = "📜 Erdem Muhafızı";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-turkuaz/20 border border-turkuaz/40 text-turkuaz-light text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Tebrikler! Değerlerimizi ve atasözlerimizin inceliklerini çok iyi kavramışsın.";
+            } else if (accuracy >= 50) {
+                rankBadge.innerText = "🔍 Hikmet Yolcusu";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-300 text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Güzel bir gayret! Aşağıdaki inceleme listesinden hikmetleri okuyup hemen yeni bir 10 senaryo başlatabilirsin.";
+            } else {
+                rankBadge.innerText = "🌱 Hevesli Çırak";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-otagKizil/20 border border-otagKizil/40 text-amber-200 text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Olayları atasözleriyle anlamlandırmak tecrübe ister. Senaryoları inceleyip tekrar dene!";
+            }
+
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+
+            currentGameQuestions.forEach((item, idx) => {
+                const userResult = userGameLog.find(u => u.number === (idx + 1));
+                const wasCorrect = userResult && userResult.isCorrect;
+
+                const div = document.createElement('div');
+                div.className = "p-4 rounded-2xl bg-bozkir-950/90 border border-amberGold/20 text-xs text-left";
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-turkuaz/15 border border-turkuaz/30 text-turkuaz-light text-[11px] font-bold">
+                            <i class="fa-solid fa-heart mr-1 text-[10px]"></i> Kök Değer: ${item.deger}
+                        </span>
+                        ${!userResult 
+                            ? '<span class="text-slate-500 font-semibold">Cevaplanamadı</span>' 
+                            : wasCorrect 
+                                ? '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Doğru</span>' 
+                                : '<span class="text-rose-400 font-bold"><i class="fa-solid fa-xmark mr-1"></i>Yanlış Seçim</span>'
+                        }
+                    </div>
+                    <p class="text-slate-300 italic mb-2">"${item.olay}"</p>
+                    <div class="p-2 rounded-xl bg-bozkir-900 border border-amberGold/20 text-amberGold-light font-serif font-bold text-xs mb-1">
+                        Doğru Atasözü: "${item.dogru}"
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">${item.aciklama}</p>
+                `;
+                reviewList.appendChild(div);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openModal(id) {
+            playSazSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.style.display = 'flex';
+                setTimeout(() => m.classList.remove('opacity-0'), 10);
+            }
+        }
+
+        function closeModal(id) {
+            playSazSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.classList.add('opacity-0');
+                setTimeout(() => m.style.display = 'none', 200);
+            }
+        }
+    </script>
+</body>
+</html>

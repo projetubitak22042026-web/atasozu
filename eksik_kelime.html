@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ataların Sözünde Maarifin İzinde - Atasözleri ve Değerleri Oyunu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bozkir: {
+                            950: '#070c12',
+                            900: '#0c131a',
+                            850: '#121d27',
+                            800: '#1c2d3d',
+                            700: '#284055'
+                        },
+                        turkuaz: {
+                            DEFAULT: '#0ea5b7',
+                            light: '#38d9ec',
+                            dark: '#087382'
+                        },
+                        otagKizil: {
+                            DEFAULT: '#c85a28',
+                            light: '#e07644',
+                            dark: '#8c3510'
+                        },
+                        amberGold: {
+                            DEFAULT: '#d4af37',
+                            light: '#f7e7a9',
+                            dark: '#9e7b16'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .pattern-bg {
+            background-color: #d97706; /* Turuncu arka plan */
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
+                radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, #d97706 1.5px);
+            background-size: 42px 42px;
+            background-position: 0 0, 21px 21px;
+        }
+
+        .gold-border {
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.08);
+        }
+
+        .turkuaz-border {
+            border: 1px solid rgba(14, 165, 183, 0.45);
+            box-shadow: 0 0 20px rgba(14, 165, 183, 0.12);
+        }
+
+        .turkuaz-text-gradient {
+            background: linear-gradient(135deg, #a5f3fc 0%, #38d9ec 40%, #0ea5b7 75%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-glass {
+            background: rgba(18, 29, 39, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.25); }
+            50% { box-shadow: 0 0 24px rgba(212, 175, 55, 0.65); }
+        }
+
+        .slot-pulse {
+            animation: pulseGlow 1.8s infinite;
+        }
+
+        #confettiCanvas {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="pattern-bg text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-400 selection:text-bozkir-950 relative overflow-x-hidden">
+
+    <!-- Konfeti Çizim Tuvali -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- ÜST BİLGİ & DURUM ÇUBUĞU -->
+    <header class="w-full card-glass border-b border-amberGold/25 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showHomeScreen()">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-otagKizil via-amberGold to-turkuaz p-0.5 shadow-lg shadow-amberGold/20 flex items-center justify-center">
+                    <div class="w-full h-full bg-bozkir-900 rounded-full flex items-center justify-center text-amberGold">
+                        <i class="fa-solid fa-campground text-base"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="font-serif font-bold text-xs sm:text-sm text-amberGold-light tracking-wide block">ATALARIN SÖZÜNDE MAARİFİN İZİNDE</span>
+                    <span class="text-[10px] text-turkuaz-light uppercase tracking-widest font-semibold block">Atasözleri ve Değerler Oyunu</span>
+                </div>
+            </div>
+
+            <!-- Sağ Aksiyon ve Göstergeler -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- Oyun İçi Canlar -->
+                <div id="livesContainer" class="hidden items-center space-x-1 text-rose-500 text-sm sm:text-base" title="Kalan Hak">
+                    <i class="fa-solid fa-heart heart-1 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-2 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-3 transition-transform"></i>
+                </div>
+
+                <!-- Oyun İçi Puan -->
+                <div id="scoreContainer" class="hidden px-3 py-1 rounded-xl bg-amberGold/15 border border-amberGold/30 items-center space-x-1.5">
+                    <i class="fa-solid fa-award text-amberGold text-xs sm:text-sm"></i>
+                    <span id="scoreText" class="font-bold text-amberGold-light text-xs sm:text-sm tracking-wider">0</span>
+                </div>
+
+                <!-- Kültürel Ses Butonu -->
+                <button id="soundBtn" onclick="toggleSound()" class="p-2 sm:p-2.5 rounded-xl border border-turkuaz/30 text-turkuaz-light hover:bg-turkuaz/10 transition" title="Ses Aç/Kapat">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-xs sm:text-sm"></i>
+                </button>
+
+                <!-- Nasıl Oynanır Butonu -->
+                <button onclick="openModal('howToPlayModal')" class="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-amberGold/30 text-amberGold-light hover:bg-amberGold/10 transition">
+                    <i class="fa-regular fa-circle-question mr-1.5"></i> Kurallar
+                </button>
+            </div>
+        </div>
+
+        <!-- İlerleme Çubuğu -->
+        <div id="progressContainer" class="hidden w-full bg-bozkir-950/90 h-1.5 sm:h-2 relative overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-otagKizil via-amberGold to-turkuaz transition-all duration-300 ease-out" style="width: 0%;"></div>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-center items-center">
+
+        <!-- ================= BÖLÜM 1: ANA GİRİŞ EKRANI ================= -->
+        <div id="homeSection" class="w-full flex flex-col items-center">
+
+            <!-- Hero Başlık -->
+            <section class="text-center max-w-3xl mb-12">
+                <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-otagKizil/20 to-turkuaz/20 border border-amberGold/40 text-amberGold-light text-xs font-semibold uppercase tracking-wider mb-5">
+                    <i class="fa-solid fa-scroll text-amberGold"></i>
+                    <span>Kadim Miras, Kök Değerler ve Maarif Bilgeliği</span>
+                </div>
+                
+                <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif font-black turkuaz-text-gradient tracking-wide leading-tight mb-4 uppercase drop-shadow-sm">
+                    Ataların Sözünde<br>Maarifin İzinde
+                </h1>
+                <p class="text-base sm:text-xl text-turkuaz-light font-medium mb-3">
+                    Atasözleri ve Kültürel Değerler Bilgi Oyunu
+                </p>
+                <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light mb-8 max-w-2xl mx-auto">
+                    Kültürel mirasımızdaki en yaygın 150 atasözünü keşfedin; her oyunda <strong>rastgele 25 soruyla</strong> yarışıp kök değerlerimizi Dombra tınıları ve konfetilerle pekiştirin!
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="directStartGame()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold text-lg shadow-xl shadow-amberGold/20 hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-3 cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Hemen 25 Soruya Başla</span>
+                    </button>
+                    <a href="#kulturelVitrin" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass turkuaz-border text-turkuaz-light font-semibold text-base hover:bg-turkuaz/10 transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-landmark text-turkuaz"></i>
+                        <span>Kültür Mirasını Gör</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- KÜLTÜREL VİTRİN: Dede Korkut (Yatay, Geniş ve Uzun Görünümlü Kart) -->
+            <section id="kulturelVitrin" class="w-full max-w-4xl mb-14">
+                <div class="card-glass gold-border rounded-3xl overflow-hidden shadow-2xl hover:border-amberGold transition-all duration-300 group">
+                    <div class="flex flex-col md:flex-row items-stretch">
+                        <!-- Yatay Görsel Alanı -->
+                        <div class="md:w-1/2 h-64 sm:h-72 md:h-auto min-h-[260px] relative overflow-hidden">
+                            <img src="dede korkut.jfif" alt="Dede Korkut" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-bozkir-900/90 via-bozkir-900/30 to-transparent"></div>
+                            <span class="absolute top-4 left-4 px-3.5 py-1 rounded-full text-xs font-bold bg-amberGold text-bozkir-950 shadow-md">
+                                <i class="fa-solid fa-feather-pointed mr-1.5"></i> Bilgelik & Maarif
+                            </span>
+                        </div>
+                        <!-- Bilgi Alanı -->
+                        <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-2 text-xs uppercase tracking-widest text-amberGold font-semibold mb-2">
+                                    <i class="fa-solid fa-scroll"></i>
+                                    <span>Kadim Sözün Piri</span>
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-3">Dede Korkut</h3>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed font-light mb-6">
+                                    Boy boylayan, soy soylayan töremizin bilge atası. Asırlar öncesinden gelen hikmetli öğütleri; adalet, doğruluk, sabır ve dürüstlüğün asırlık pusulasıdır.
+                                </p>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-amberGold/30 flex items-center space-x-3">
+                                <i class="fa-solid fa-quote-left text-amberGold text-xl shrink-0 opacity-70"></i>
+                                <div class="text-xs sm:text-sm text-amberGold-light italic">
+                                    "Doğru söz yemin istemez; yol erenlerin, hikmet ise ataların yoludur."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Günün Atasözü ve Değeri Kartı -->
+            <section class="w-full max-w-3xl mb-12">
+                <div class="relative card-glass gold-border rounded-2xl p-6 sm:p-7">
+                    <div class="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-gradient-to-r from-amberGold to-otagKizil text-bozkir-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-scroll"></i> Günün Atasözü & Hikmeti
+                    </div>
+                    
+                    <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex-1 pr-2 w-full">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span id="homeQuoteValue" class="text-xs px-2.5 py-0.5 rounded-full bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40 font-semibold uppercase tracking-wide">
+                                    Kök Değer: Dayanışma
+                                </span>
+                            </div>
+                            <!-- Günün Atasözü Görseli -->
+                            <img src="Gemini_Generated_Image_3ufn9p3ufn9p3ufn.jfif" alt="Türk Atasözleri" class="w-full h-44 sm:h-52 object-cover rounded-xl mb-4 border border-amberGold/40 shadow-lg">
+                            <blockquote id="homeQuoteText" class="text-xl sm:text-2xl font-serif font-semibold text-amberGold-light tracking-wide italic mb-2 transition-opacity duration-200">
+                                "Yalnız taş, duvar olmaz."
+                            </blockquote>
+                            <p id="homeQuoteMeaning" class="text-slate-300 text-xs sm:text-sm leading-snug transition-opacity duration-200">
+                                İnsanlar tek başlarına büyük işleri başaramazlar; yardımlaşma ve dayanışma esastır.
+                            </p>
+                        </div>
+                        <button type="button" onclick="refreshHomeQuote()" class="self-end sm:self-center px-4 py-2.5 rounded-xl border border-amberGold/40 text-amberGold-light hover:bg-amberGold/20 active:scale-95 transition flex items-center gap-2 text-xs font-semibold cursor-pointer shrink-0 z-10" title="Yeni Söz Getir">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                            <span>Yenile</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= BÖLÜM 2: AKTİF OYUN EKRANI ================= -->
+        <div id="gameSection" class="hidden w-full max-w-3xl flex flex-col space-y-5">
+            <!-- Soru Sayacı ve Kombo -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span id="questionCounterBadge" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amberGold/20 text-amberGold-light border border-amberGold/30">
+                        Soru 1 / 25
+                    </span>
+                    <span id="currentValueBadge" class="inline-block px-3 py-1 rounded-full text-[11px] font-semibold bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40">
+                        <i class="fa-solid fa-seedling mr-1"></i> <span id="badgeValueText">Kök Değer</span>
+                    </span>
+                </div>
+
+                <!-- Kombo Bildirimi -->
+                <div id="comboBadge" class="hidden items-center space-x-1.5 px-3 py-1 rounded-full bg-otagKizil/20 border border-otagKizil/40 text-otagKizil-light text-xs font-bold">
+                    <i class="fa-solid fa-fire text-amberGold"></i>
+                    <span id="comboText">2x Seri</span>
+                </div>
+            </div>
+
+            <!-- Atasözü Kartı -->
+            <div class="card-glass gold-border rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden">
+                <div class="flex items-center justify-center space-x-2 text-xs uppercase tracking-widest text-amber-200/60 mb-3 font-semibold">
+                    <i class="fa-solid fa-quote-left text-amberGold"></i>
+                    <span>Boş bırakılan yere hangi sözcük gelmelidir?</span>
+                    <i class="fa-solid fa-quote-right text-amberGold"></i>
+                </div>
+
+                <!-- Eksik Kelimeli Atasözü -->
+                <div id="quoteDisplay" class="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-white leading-relaxed my-4">
+                    <!-- Dinamik doldurulur -->
+                </div>
+
+                <!-- Harf İpucu Bildirimi -->
+                <div id="letterHintContainer" class="hidden text-xs text-turkuaz-light font-semibold bg-turkuaz/10 py-1.5 px-4 rounded-full inline-block border border-turkuaz/30 mt-2">
+                    <i class="fa-solid fa-lightbulb mr-1 text-amberGold"></i> İlk Harf: <span id="hintLetterChar" class="uppercase font-bold text-sm text-white"></span>
+                </div>
+            </div>
+
+            <!-- Kültürel Joker Butonları -->
+            <div class="flex items-center justify-center gap-2 sm:gap-3 py-1">
+                <button id="jokerFifty" onclick="useFiftyFifty()" class="flex-1 py-2.5 px-3 rounded-xl card-glass border border-amberGold/30 text-amberGold-light text-xs font-semibold hover:bg-amberGold/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-percent text-amberGold"></i>
+                    <span>%50 Joker</span>
+                </button>
+                <button id="jokerMeaning" onclick="useMeaningHint()" class="flex-1 py-2.5 px-3 rounded-xl card-glass border border-turkuaz/30 text-turkuaz-light text-xs font-semibold hover:bg-turkuaz/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-book-open text-turkuaz-light"></i>
+                    <span>Dede Korkut Öğüdü</span>
+                </button>
+                <button id="jokerLetter" onclick="useLetterHint()" class="flex-1 py-2.5 px-3 rounded-xl card-glass border border-otagKizil/40 text-amber-200 text-xs font-semibold hover:bg-otagKizil/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-font text-otagKizil-light"></i>
+                    <span>Harf İpucu</span>
+                </button>
+            </div>
+
+            <!-- Seçenekler Izgarası (4 Şık) -->
+            <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- Şıklar dinamik oluşturulur -->
+            </div>
+
+            <!-- Anlam İpucu Kutusu (Joker ile Açılır) -->
+            <div id="hintMeaningBox" class="hidden p-4 rounded-2xl bg-bozkir-950/90 border border-turkuaz/30 text-xs sm:text-sm text-slate-300 leading-relaxed text-center">
+                <span class="font-bold text-turkuaz-light block mb-1"><i class="fa-solid fa-landmark mr-1"></i> TDK Anlamı & Kültürel Öğüt:</span>
+                <span id="hintMeaningText"></span>
+            </div>
+        </div>
+
+        <!-- ================= BÖLÜM 3: OYUN SONU KARNE EKRANI ================= -->
+        <div id="endSection" class="hidden w-full max-w-3xl card-glass gold-border rounded-3xl p-6 sm:p-10 flex flex-col items-center">
+            <div class="w-20 h-20 rounded-2xl bg-amberGold/20 border border-amberGold/40 text-amberGold flex items-center justify-center text-4xl mb-4 shadow-xl">
+                <i class="fa-solid fa-campground"></i>
+            </div>
+
+            <span id="resultRankBadge" class="px-4 py-1.5 rounded-full bg-amberGold/20 border border-amberGold/40 text-amberGold-light text-xs font-bold uppercase tracking-wider mb-3">
+                Kültür Bilgesi
+            </span>
+
+            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mb-2 text-center">
+                25 Soru Tamamlandı!
+            </h2>
+            <p id="resultComment" class="text-slate-300 text-sm text-center max-w-md mb-8">
+                Tebrikler! Çözdüğün 25 atasözünü ve kazandırdığı kök değerleri aşağıdan inceleyebilirsin.
+            </p>
+
+            <!-- Skor Kartları -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mb-8 text-center">
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-amberGold/20">
+                    <span class="text-xs text-slate-400 block mb-1">Toplam Puan</span>
+                    <span id="finalScore" class="text-2xl font-bold font-serif text-amberGold-light">0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-turkuaz/20">
+                    <span class="text-xs text-slate-400 block mb-1">Başarı Oranı</span>
+                    <span id="finalAccuracy" class="text-2xl font-bold font-serif text-emerald-400">%0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-otagKizil/20">
+                    <span class="text-xs text-slate-400 block mb-1">Doğru / Yanlış</span>
+                    <span id="finalRatio" class="text-2xl font-bold font-serif text-white">0 / 0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-bozkir-950/80 border border-amberGold/20">
+                    <span class="text-xs text-slate-400 block mb-1">En Uzun Seri</span>
+                    <span id="finalStreak" class="text-2xl font-bold font-serif text-orange-400">0</span>
+                </div>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-8">
+                <button onclick="directStartGame()" class="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-shuffle"></i>
+                    <span>Yeni 25 Soru Başlat</span>
+                </button>
+                <button onclick="showHomeScreen()" class="flex-1 py-3.5 px-6 rounded-xl border border-turkuaz/40 text-turkuaz-light hover:bg-turkuaz/10 font-semibold transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-campground"></i>
+                    <span>Otağa Dön</span>
+                </button>
+            </div>
+
+            <!-- Oynanan 25 Atasözünün İnceleme Tablosu -->
+            <div class="w-full border-t border-amberGold/20 pt-6">
+                <h4 class="text-base font-serif font-bold text-amberGold-light mb-4 text-center">
+                    <i class="fa-solid fa-list-check mr-2"></i> Çözdüğün 25 Atasözü & Değerleri
+                </h4>
+                <div id="reviewList" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                    <!-- Dinamik doldurulur -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- GERİ BİLDİRİM VE DEĞER KARTI MODALI -->
+    <div id="feedbackModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+        <div class="card-glass gold-border rounded-3xl max-w-lg w-full p-6 sm:p-8 text-center shadow-2xl relative">
+            <div id="feedbackIcon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3"></div>
+            <h3 id="feedbackTitle" class="text-2xl font-serif font-bold mb-2"></h3>
+            <p id="feedbackQuote" class="text-lg font-serif text-amberGold-light font-semibold mb-4 px-2"></p>
+            
+            <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amberGold/20 via-turkuaz/20 to-otagKizil/20 border border-amberGold/50 text-amberGold-light text-xs sm:text-sm font-bold shadow mb-4">
+                <i class="fa-solid fa-compass text-turkuaz-light"></i>
+                <span>Kök Değer:</span>
+                <span id="feedbackValue" class="text-white font-extrabold uppercase tracking-wide"></span>
+            </div>
+
+            <div class="bg-bozkir-950/90 p-4 rounded-2xl border border-amberGold/20 text-slate-300 text-xs sm:text-sm leading-relaxed text-left mb-6">
+                <strong class="text-amberGold block mb-1.5"><i class="fa-solid fa-scroll mr-1"></i> Anlamı & Hikmeti:</strong>
+                <span id="feedbackMeaning"></span>
+            </div>
+
+            <button id="nextQuestionBtn" onclick="nextQuestion()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer">
+                <span>Sonraki Soruya Geç</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- NASIL OYNANIR MODALI -->
+    <div id="howToPlayModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+        <div class="card-glass gold-border rounded-3xl max-w-md w-full p-6 text-left shadow-2xl relative">
+            <button onclick="closeModal('howToPlayModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-amberGold/20 flex items-center justify-center text-amberGold text-lg">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3 class="text-xl font-serif font-bold text-amberGold-light">Oyun Kuralları</h3>
+            </div>
+            <div class="space-y-3.5 text-slate-300 text-xs sm:text-sm leading-relaxed">
+                <p><strong>1.</strong> 150 atasözlük hazineden rastgele 25 soru gelir.</p>
+                <p><strong>2.</strong> Atasözündeki eksik kelimeyi 4 seçenek arasından doğru tahmin edin.</p>
+                <p><strong>3.</strong> Doğru yanıtlarda Dombra tınısı ve konfeti patlar, puanınız katlanır.</p>
+                <p><strong>4.</strong> Toplam 3 can hakkınız ve 3 farklı kültürel jokeriniz (%50, Dede Korkut Öğüdü, Harf İpucu) bulunur.</p>
+            </div>
+            <button onclick="closeModal('howToPlayModal')" class="mt-6 w-full py-3 rounded-xl bg-amberGold text-bozkir-950 font-bold hover:brightness-110 transition cursor-pointer">
+                Anladım
+            </button>
+        </div>
+    </div>
+
+    <!-- ALT BİLGİ -->
+    <footer class="w-full card-glass border-t border-amberGold/20 py-4 text-center text-xs text-slate-400">
+        <p>Ataların Sözünde Maarifin İzinde &copy; 2026 — 150 Atasözü ve Kültürel Kök Değerler Bilgi Oyunu</p>
+    </footer>
+
+    <!-- JAVASCRIPT KODLARI -->
+    <script>
+        // HTML5 CANVAS KONFETİ MOTORU
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
+        let animationFrameId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function fireConfetti() {
+            playCulturalSound('victory');
+            const colors = ['#d4af37', '#f7e7a9', '#0ea5b7', '#38d9ec', '#c85a28', '#e07644', '#ffffff'];
+            for (let i = 0; i < 90; i++) {
+                confettiParticles.push({
+                    x: canvas.width / 2 + (Math.random() * 120 - 60),
+                    y: canvas.height * 0.35 + (Math.random() * 60 - 30),
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedX: (Math.random() - 0.5) * 16,
+                    speedY: Math.random() * -14 - 5,
+                    gravity: 0.36,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 14,
+                    opacity: 1
+                });
+            }
+            if (!animationFrameId) renderConfetti();
+        }
+
+        function renderConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = confettiParticles.length - 1; i >= 0; i--) {
+                const p = confettiParticles[i];
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.speedY += p.gravity;
+                p.rotation += p.rotationSpeed;
+                p.opacity -= 0.012;
+
+                if (p.opacity <= 0 || p.y > canvas.height) {
+                    confettiParticles.splice(i, 1);
+                    continue;
+                }
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = Math.max(0, p.opacity);
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+                ctx.restore();
+            }
+            if (confettiParticles.length > 0) {
+                animationFrameId = requestAnimationFrame(renderConfetti);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        // SES MOTORU (Web Audio API)
+        let audioCtx = null;
+        let soundMuted = false;
+
+        function getAudioContext() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (e) {
+                console.warn("Audio Context başlatılamadı:", e);
+            }
+            return audioCtx;
+        }
+
+        function playCulturalSound(type) {
+            if (soundMuted) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'dombra_correct') {
+                    const freqs = [293.66, 392.00, 440.00, 587.33];
+                    freqs.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = idx % 2 === 0 ? 'triangle' : 'sine';
+                        osc.frequency.setValueAtTime(freq, now + (idx * 0.06));
+
+                        gain.gain.setValueAtTime(0, now + (idx * 0.06));
+                        gain.gain.linearRampToValueAtTime(0.18, now + (idx * 0.06) + 0.01);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.06) + 0.28);
+
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + (idx * 0.06));
+                        osc.stop(now + (idx * 0.06) + 0.28);
+                    });
+                } else if (type === 'victory') {
+                    const drumOsc = ctx.createOscillator();
+                    const drumGain = ctx.createGain();
+                    drumOsc.type = 'sine';
+                    drumOsc.frequency.setValueAtTime(120, now);
+                    drumOsc.frequency.exponentialRampToValueAtTime(45, now + 0.35);
+
+                    drumGain.gain.setValueAtTime(0.28, now);
+                    drumGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+                    drumOsc.connect(drumGain);
+                    drumGain.connect(ctx.destination);
+                    drumOsc.start(now);
+                    drumOsc.stop(now + 0.4);
+                } else if (type === 'ney_hint') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(392.00, now);
+                    osc.frequency.linearRampToValueAtTime(523.25, now + 0.25);
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.linearRampToValueAtTime(0.12, now + 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(95, now + 0.2);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.22);
+                } else if (type === 'click') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(420, now);
+                    osc.frequency.exponentialRampToValueAtTime(240, now + 0.05);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function toggleSound() {
+            soundMuted = !soundMuted;
+            const icon = document.getElementById('soundIcon');
+            if (soundMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-turkuaz-light';
+                playCulturalSound('click');
+            }
+        }
+
+        // TAM 150 ATASÖZÜ HAVUZU[cite: 14]
+        const fullProverbsPool = [
+            { id: 1, before: "Yalnız taş,", missing: "duvar", after: "olmaz.", options: ["duvar", "bina", "kale", "yol"], meaning: "İnsanlar tek başlarına büyük işleri başaramazlar; yardımlaşma ve dayanışma esastır.", deger: "Dayanışma" },
+            { id: 2, before: "Ağaç yaprağıyla", missing: "gürler", after: ".", options: ["gürler", "yeşerir", "büyür", "parlar"], meaning: "İnsan ailesi, dostları ve yakınlarıyla bir arada olunca güçlü ve mutludur.", deger: "Dayanışma" },
+            { id: 3, before: "El eli yıkar, iki el", missing: "yüzü", after: "yıkar.", options: ["yüzü", "başı", "kolu", "gözü"], meaning: "İnsanlar birbirine yardım ederse bundan bütün toplum kazançlı çıkar.", deger: "Dayanışma" },
+            { id: 4, before: "Tek kanatla kuş", missing: "uçmaz", after: ".", options: ["uçmaz", "avlanmaz", "ötmez", "konmaz"], meaning: "Önemli işlerin başarıya ulaşması için karşılıklı yardımlaşma şarttır.", deger: "Dayanışma" },
+            { id: 5, before: "Dağ dağa kavuşmaz, insan insana", missing: "kavuşur", after: ".", options: ["kavuşur", "ulaşır", "buluşur", "yetişir"], meaning: "Araları uzak bile olsa insanlar günün birinde karşılaşabilir; hatır saymak gerekir.", deger: "Dayanışma" },
+            { id: 6, before: "Düğün el ile, harman", missing: "yel", after: "ile olur.", options: ["yel", "su", "gün", "el"], meaning: "Büyük işler ve sevinçler ancak çevrenin desteği ve uygun şartlarla gerçekleşir.", deger: "Dayanışma" },
+            { id: 7, before: "Sütten ağzı yanan, yoğurdu", missing: "üfleyerek", after: "yer.", options: ["üfleyerek", "soğutarak", "korkarak", "tadarak"], meaning: "Bir olaydan zarar gören kimse, sonradan benzer durumlarda çok daha tedbirli davranır.", deger: "Halden Anlamak" },
+            { id: 8, before: "Hamama giren", missing: "terler", after: ".", options: ["terler", "yıkanır", "yorulur", "ısınır"], meaning: "Bir işe veya sorumluluğa girişen kimse onun güçlüklerine katlanmak zorundadır.", deger: "Sorumluluk Bilinci" },
+            { id: 9, before: "Taşıma su ile", missing: "değirmen", after: "dönmez.", options: ["değirmen", "çark", "göl", "tekne"], meaning: "Başkalarının küçük ve geçici yardımlarıyla büyük ve sürekli bir iş yürütülemez.", deger: "Sorumluluk Bilinci" },
+            { id: 10, before: "Bakarsan bağ, bakmazsan", missing: "dağ", after: "olur.", options: ["dağ", "çöl", "kül", "çalılık"], meaning: "Emek verilen işler güzelleşip gelişir; ilgisiz bırakılan şeyler harap olur.", deger: "Sorumluluk Bilinci" },
+            { id: 11, before: "Her horoz kendi", missing: "çöplüğünde", after: "öter.", options: ["çöplüğünde", "kümesinde", "köyünde", "damında"], meaning: "Kişi en çok kendi çevresinde ve yetki alanında söz sahibidir.", deger: "Sorumluluk Bilinci" },
+            { id: 12, before: "Demir tavında", missing: "dövülür", after: ".", options: ["dövülür", "işlenir", "eğilir", "parlar"], meaning: "Her iş vaktinde, fırsat kaçırılmadan yapılmalıdır.", deger: "Sorumluluk Bilinci" },
+            { id: 13, before: "Söz ağızdan", missing: "çıkar", after: ".", options: ["çıkar", "bellidir", "yayılır", "duyulur"], meaning: "Mert insan verdiği sözün arkasında durur; söz namustur.", deger: "Sorumluluk Bilinci" },
+            { id: 14, before: "Damlaya damlaya", missing: "göl", after: "olur.", options: ["göl", "nehir", "deniz", "sel"], meaning: "Küçük birikimler zamanla büyük bir değere dönüşür; tasarruf ve sabrı simgeler.", deger: "Sabır ve Emek" },
+            { id: 15, before: "Yuvarlanan taş", missing: "yosun", after: "tutmaz.", options: ["yosun", "pas", "leke", "toz"], meaning: "Sürekli iş veya yer değiştirenler belirli bir alanda derinleşip birikim sağlayamazlar.", deger: "Sabır ve Emek" },
+            { id: 16, before: "Arı bal alacak", missing: "çiçeği", after: "bilir.", options: ["çiçeği", "bahçeyi", "ağacı", "yaprağı"], meaning: "İşini bilen ve çalışkan insan, kimden ve nereden fayda sağlayacağını iyi kestirir.", deger: "Sabır ve Emek" },
+            { id: 17, before: "Başlamak bitirmenin", missing: "yarısıdır", after: ".", options: ["yarısıdır", "kolayıdır", "başıdır", "yoludur"], meaning: "Bir işe kararlılıkla adım atmak, o işin en zor kısmını aşmak demektir.", deger: "Sabır ve Emek" },
+            { id: 18, before: "Dağ ne kadar yüce olsa da üstünden", missing: "yol", after: "aşar.", options: ["yol", "bulut", "rüzgâr", "kuş"], meaning: "Ne kadar zorlu görünürse görününsün, azim ve gayretle her engelin üstesinden gelinir.", deger: "Sabır ve Emek" },
+            { id: 19, before: "Yalancının mumu", missing: "yatsıya", after: "kadar yanar.", options: ["yatsıya", "akşama", "sabaha", "öğleye"], meaning: "Söylenen yalanlar çok geçmeden açığa çıkar; dürüstlük esastır.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 20, before: "Doğru söyleyeni dokuz", missing: "köyden", after: "kovarlar.", options: ["köyden", "şehirden", "kapıdan", "yoldan"], meaning: "Doğruları dile getirmek bazen tepki çekse de hakikatten vazgeçilmemelidir.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 21, before: "Güneş balçıkla", missing: "sıvanmaz", after: ".", options: ["sıvanmaz", "kapanmaz", "örtülmez", "saklanmaz"], meaning: "Açık ve herkesçe bilinen gerçekler yalanlarla örtbas edilemez.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 22, before: "Yalancının ipiyle", missing: "kuyuya", after: "inilmez.", options: ["kuyuya", "yola", "ava", "dağa"], meaning: "Sözüne güvenilmeyen hilekâr kişilere inanarak önemli işlere girişilmez.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 23, before: "Minareyi çalan", missing: "kılıfını", after: "hazırlar.", options: ["kılıfını", "yolunu", "çatısını", "taşını"], meaning: "Haksızlık yapan kişi, önceden kendini haklı gösterecek bahaneler uydurur.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 24, before: "Ayağını yorganına göre", missing: "uzat", after: ".", options: ["uzat", "ayarla", "uydur", "ölç"], meaning: "Giderler gelire uygun tutulmalı; ölçülü ve dengeli yaşanmalıdır.", deger: "Ölçülülük ve Denge" },
+            { id: 25, before: "Bir elin nesi var, iki elin", missing: "sesi", after: "var.", options: ["sesi", "gücü", "yolu", "kârı"], meaning: "Büyük başarılar ancak yardımlaşma ve dayanışma ile elde edilir.", deger: "Dayanışma" },
+            { id: 26, before: "Sürüden ayrılanı", missing: "kurt", after: "kapar.", options: ["kurt", "tilki", "ayı", "avcı"], meaning: "Toplumdan, ailesinden ve birlikten kopan kişiler tehlikelere açık hale gelir.", deger: "Dayanışma" },
+            { id: 27, before: "Sağ elin verdiğini,", missing: "sol", after: "el görmesin.", options: ["sol", "öbür", "diğer", "hiçbir"], meaning: "Yapılan yardımlar gösterişten uzak, ihtiyaç sahibini incitmeden yapılmalıdır.", deger: "Dayanışma" },
+            { id: 28, before: "Veren el, alan elden", missing: "üstündür", after: ".", options: ["üstündür", "güçlüdür", "iyidir", "büyüktür"], meaning: "Yardım eden ve cömert davranan kimse her zaman daha saygındır.", deger: "Dayanışma" },
+            { id: 29, before: "Yarım elma,", missing: "gönül", after: "alma.", options: ["gönül", "hatır", "dost", "sevgi"], meaning: "Küçük de olsa samimiyetle verilen hediyeler gönülleri fetheder.", deger: "Dayanışma" },
+            { id: 30, before: "İğneyi kendine,", missing: "çuvaldızı", after: "başkasına batır.", options: ["çuvaldızı", "bıçağı", "sopayı", "oku"], meaning: "Başkalarını eleştirmeden önce kendi kusur ve hatalarımızı tartmalıyız.", deger: "Empati" },
+            { id: 31, before: "Davulun sesi", missing: "uzaktan", after: "hoş gelir.", options: ["uzaktan", "yüksekten", "geceleyin", "derinden"], meaning: "İç yüzü bilinmeyen zorlu durumlar, dışarıdan bakanlara kolay ve cazip görünür.", deger: "Empati" },
+            { id: 32, before: "Herkesin tenceresi", missing: "kapalı", after: "kaynar.", options: ["kapalı", "sessiz", "gizli", "sıcak"], meaning: "Her ailenin ve kişinin dışarıdan görünmeyen kendine has bir derdi vardır.", deger: "Empati" },
+            { id: 33, before: "Her koyun kendi", missing: "bacağından", after: "asılır.", options: ["bacağından", "boynundan", "kuyruğundan", "ipinden"], meaning: "Herkes kendi davranış ve hatalarının hesabını kendisi verir.", deger: "Sorumluluk Bilinci" },
+            { id: 34, before: "Aslan yattığı", missing: "yerden", after: "belli olur.", options: ["yerden", "dağdan", "yuvadan", "otaktan"], meaning: "İnsanın tertibi, intizamı ve karakteri bulunduğu çevrenin düzeninden anlaşılır.", deger: "Sorumluluk Bilinci" },
+            { id: 35, before: "Doğru duvar", missing: "yıkılmaz", after: ".", options: ["yıkılmaz", "sarsılmaz", "eğilmez", "çökmez"], meaning: "İşini sağlam ve dürüstçe yapan kimse hiçbir zorluk karşısında zarar görmez.", deger: "Sorumluluk Bilinci" },
+            { id: 36, before: "Eğri ağacın doğru", missing: "gölgesi", after: "olmaz.", options: ["gölgesi", "yaprağı", "dalı", "kökü"], meaning: "Kötü ve kusurlu niyetlerden doğru ve adil sonuçlar doğmaz.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 37, before: "Yanlış hesap", missing: "Bağdat'tan", after: "döner.", options: ["Bağdat'tan", "pazardan", "çarşıdan", "kapıdan"], meaning: "Hatalı ve haksız bir iş eninde sonunda bir yerden döner ve düzeltilir.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 38, before: "İki dinle,", missing: "bir", after: "söyle.", options: ["bir", "az", "doğru", "öz"], meaning: "İnsan konuşmaktan çok dinlemeye ve anlamaya önem vermelidir.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 39, before: "Ateş olmayan yerden", missing: "duman", after: "çıkmaz.", options: ["duman", "kül", "alev", "kıvılcım"], meaning: "Konuşulan bir meselenin altında mutlaka bir gerçeklik payı vardır.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 40, before: "Gülme komşuna, gelir", missing: "başına", after: ".", options: ["başına", "kapına", "yurduna", "hanene"], meaning: "Başkalarının dertleriyle alay edilmemelidir; aynı durum herkesin başına gelebilir.", deger: "Empati" },
+            { id: 41, before: "Tok açın", missing: "halinden", after: "anlamaz.", options: ["halinden", "aşından", "sözünden", "yolundan"], meaning: "Varlıklı kimseler, darda olanların çektiği sıkıntıyı tam olarak kavrayamazlar.", deger: "Empati" },
+            { id: 42, before: "Biri yer biri bakar,", missing: "kıyamet", after: "ondan kopar.", options: ["kıyamet", "kavga", "fitne", "bela"], meaning: "Paylaşmanın olmadığı ve haksızlığın yaşandığı yerde huzursuzluk çıkar.", deger: "Empati" },
+            { id: 43, before: "Rüzgâr eken", missing: "fırtına", after: "biçer.", options: ["fırtına", "kasırga", "boran", "toz"], meaning: "Çevresine kötülük eken kimse, kat kat şiddetli tepkilerle karşılaşır.", deger: "Sorumluluk Bilinci" },
+            { id: 44, before: "Kendi düşen", missing: "ağlamaz", after: ".", options: ["ağlamaz", "sızlanmaz", "kalkamaz", "bağırmaz"], meaning: "Kendi hatası yüzünden zarara uğrayan kimsenin sızlanmaya hakkı yoktur.", deger: "Sorumluluk Bilinci" },
+            { id: 45, before: "Ek tohumun hasını, çekme yiyecek", missing: "yasını", after: ".", options: ["yasını", "derdini", "gamını", "yükünü"], meaning: "İşini kaliteli ve sağlam yapan insan, gelecekte sıkıntı çekmez.", deger: "Sorumluluk Bilinci" },
+            { id: 46, before: "Emanete", missing: "hıyanet", after: "olmaz.", options: ["hıyanet", "kötülük", "zarar", "ortak"], meaning: "Bize güvenilerek bırakılan mal ve sırlar titizlikle korunmalıdır.", deger: "Sorumluluk Bilinci" },
+            { id: 47, before: "Birlikten", missing: "kuvvet", after: "doğar.", options: ["kuvvet", "huzur", "bereket", "sevgi"], meaning: "Birlikte hareket eden topluluklar tüm zorlukları kolayca aşarlar.", deger: "Dayanışma" },
+            { id: 48, before: "Komşu komşunun külüne", missing: "muhtaçtır", after: ".", options: ["muhtaçtır", "bağlıdır", "hasrettir", "ortaktır"], meaning: "İnsanlar en küçük hususlarda bile birbirlerinin yardımına muhtaçtır.", deger: "Dayanışma" },
+            { id: 49, before: "Baş başa vermeyince taş", missing: "yerinden", after: "kalkmaz.", options: ["yerinden", "dağdan", "yoldan", "topraktan"], meaning: "Zor işler ancak güç birliği ve ortak çalışma ile halledilebilir.", deger: "Dayanışma" },
+            { id: 50, before: "Damdan düşen,", missing: "damdan", after: "düşenin halini anlar.", options: ["damdan", "yoldan", "evden", "elden"], meaning: "Bir acıyı bizzat yaşayan kimseler, aynı durumdakileri en iyi anlarlar.", deger: "Empati" },
+            { id: 51, before: "El elin eşeğini", missing: "türkü", after: "çağırarak arar.", options: ["türkü", "ıslık", "gülerek", "koşarak"], meaning: "Başkaları senin derdine senin kadar samimiyetle üzülmez; kendi işine sahip çık.", deger: "Empati" },
+            { id: 52, before: "Ne doğrarsan aşına, o çıkar", missing: "kaşığına", after: ".", options: ["kaşığına", "kabına", "önüne", "payına"], meaning: "Hayatta ne kadar emek harcarsan, karşılığında o kadar verim alırsın.", deger: "Sorumluluk Bilinci" },
+            { id: 53, before: "Akıl yaşta değil,", missing: "baştadır", after: ".", options: ["baştadır", "gözdedir", "özdedir", "candadır"], meaning: "Doğru düşünebilme yeteneği yaşa değil, zekâ ve kavrayışa bağlıdır.", deger: "Sorumluluk Bilinci" },
+            { id: 54, before: "Sakla samanı, gelir", missing: "zamanı", after: ".", options: ["zamanı", "baharı", "sırası", "kıymeti"], meaning: "En değersiz görünen şeyler bile günün birinde çok işe yarayabilir.", deger: "Sorumluluk Bilinci" },
+            { id: 55, before: "Doğru söz", missing: "yemin", after: "istemez.", options: ["yemin", "şahit", "delil", "senet"], meaning: "Sözü doğru ve dürüst olan insanın inandırıcılığı için yemine ihtiyacı yoktur.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 56, before: "Altın çamura düşmekle", missing: "değerini", after: "kaybetmez.", options: ["değerini", "rengini", "ışığını", "kıymetini"], meaning: "Değerli ve dürüst insanlar kötü ortamlarda kalsalar da asaletlerini korurlar.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 57, before: "Dost kara", missing: "günde", after: "belli olur.", options: ["günde", "yılda", "anda", "yolda"], meaning: "Gerçek dostlar insanın sıkıntılı ve zor günlerinde yanında durandır.", deger: "Dayanışma" },
+            { id: 58, before: "Kardeş kardeşi atmış, yâr başında", missing: "tutmuş", after: ".", options: ["tutmuş", "bulmuş", "beklemiş", "görmüş"], meaning: "Aile fertleri aralarında tartışıverse bile zor anda yine birbirine kenetlenir.", deger: "Dayanışma" },
+            { id: 59, before: "Az veren candan, çok veren", missing: "maldan", after: ".", options: ["maldan", "varlıktan", "kârdan", "keseden"], meaning: "Yoksulun yaptığı fedakarlık, zenginin verdiği paradan çok daha kıymetlidir.", deger: "Dayanışma" },
+            { id: 60, before: "İyilik eden", missing: "iyilik", after: "bulur.", options: ["iyilik", "huzur", "kısmet", "dost"], meaning: "Çevresine hayır ve yardımda bulunan kimse, ihtiyaç duyduğunda iyilik görür.", deger: "Dayanışma" },
+            { id: 61, before: "İyilik yap denize at, balık bilmezse", missing: "Halik", after: "bilir.", options: ["Halik", "deniz", "sular", "halk"], meaning: "İyilikler gösteriş veya karşılık beklemeden, sırf erdem olduğu için yapılmalıdır.", deger: "Dayanışma" },
+            { id: 62, before: "Ne verirsen elinle, o gider", missing: "seninle", after: ".", options: ["seninle", "peşinle", "ömrünle", "canınla"], meaning: "İnsanın ardında bıraktığı gerçek sermaye yaptığı hayır ve iyiliklerdir.", deger: "Dayanışma" },
+            { id: 63, before: "Dost dostun", missing: "eyerlenmiş", after: "atıdır.", options: ["eyerlenmiş", "yoldaşı", "kanadı", "kalkanı"], meaning: "Hakiki dost, arkadaşının zor anında hemen yardıma koşmaya hazır bekler.", deger: "Dayanışma" },
+            { id: 64, before: "Misafir", missing: "kısmetiyle", after: "gelir.", options: ["kısmetiyle", "bereketiyle", "sevinciyle", "aşıyla"], meaning: "Konuk ağırlamak külfet değil, eve bereket ve neşe getiren bir erdemdir.", deger: "Dayanışma" },
+            { id: 65, before: "El el ile, değirmen", missing: "yel", after: "ile.", options: ["yel", "su", "çark", "un"], meaning: "İnsanlar birbirine destek olarak en çetin işleri başarırlar.", deger: "Dayanışma" },
+            { id: 66, before: "Komşuda pişer, bize de", missing: "düşer", after: ".", options: ["düşer", "gelir", "kalır", "nasip olur"], meaning: "Yakın çevremizin kazandığı güzelliklerden bizler de istifade ederiz.", deger: "Dayanışma" },
+            { id: 67, before: "Kişi kendinden", missing: "bilir", after: "işi.", options: ["bilir", "anlar", "görür", "seçer"], meaning: "İnsan karşısındakini kendi niyeti ve ahlakı doğrultusunda değerlendirir.", deger: "Empati" },
+            { id: 68, before: "Hasta olmayan sağlığın", missing: "kadrini", after: "bilmez.", options: ["kadrini", "tadını", "huzurunu", "kıymetini"], meaning: "İnsanlar nimetlerin kıymetini ancak onları kaybettiklerinde kavrarlar.", deger: "Empati" },
+            { id: 69, before: "Bana dokunmayan yılan bin", missing: "yaşasın", after: "(diyen bencil olur).", options: ["yaşasın", "uyusun", "büyüsün", "kalsın"], meaning: "Toplumun derdine duyarsız kalmak eleştirilen bencil bir davranıştır.", deger: "Empati" },
+            { id: 70, before: "Canı yanan eşek, attan", missing: "yüğrük", after: "olur.", options: ["yüğrük", "hızlı", "önde", "çevik"], meaning: "Büyük bir acı veya sıkıntı yaşayan kimse, kurtulmak için var gücüyle çabalar.", deger: "Empati" },
+            { id: 71, before: "Tok ağırlaması", missing: "güç", after: "olur.", options: ["güç", "zor", "pahalı", "uzun"], meaning: "İhtiyacı ve iştahı olmayan insanı memnun etmek zordur.", deger: "Empati" },
+            { id: 72, before: "Ağaç yaşken", missing: "eğilir", after: ".", options: ["eğilir", "yeşerir", "büyür", "budanır"], meaning: "İnsanlara güzel huylar ve terbiye küçük yaşlarda kazandırılır.", deger: "Sorumluluk Bilinci" },
+            { id: 73, before: "Ne ekersen onu", missing: "biçersin", after: ".", options: ["biçersin", "toplarsın", "bulursun", "yersin"], meaning: "Çevrene nasıl davranırsan karşılığında onu görürsün.", deger: "Sorumluluk Bilinci" },
+            { id: 74, before: "Başa gelen", missing: "çekilir", after: ".", options: ["çekilir", "bilinir", "görülür", "aşılır"], meaning: "Elden gelmeyen kaçınılmaz sıkıntılara sabır ve vakarla katlanmak gerekir.", deger: "Sorumluluk Bilinci" },
+            { id: 75, before: "Zararın neresinden dönülse", missing: "kârdır", after: ".", options: ["kârdır", "iyidir", "kazançtır", "faydadır"], meaning: "Yanlış bir yoldan ne kadar erken vazgeçilirse o kadar iyidir.", deger: "Sorumluluk Bilinci" },
+            { id: 76, before: "Su uyur,", missing: "düşman", after: "uyumaz.", options: ["düşman", "zaman", "rüzgar", "hayat"], meaning: "Tehlikelere ve kötülüklere karşı daima uyanık ve tedbirli olunmalıdır.", deger: "Sorumluluk Bilinci" },
+            { id: 77, before: "Borç yiğidin", missing: "kamçısıdır", after: ".", options: ["kamçısıdır", "yüküdür", "derdidir", "sırrıdır"], meaning: "Verdiği sözü tutmak isteyen insan çok daha azimle çalışır.", deger: "Sorumluluk Bilinci" },
+            { id: 78, before: "At binenin,", missing: "kılıç", after: "kuşananındır.", options: ["kılıç", "zırh", "kalkan", "yay"], meaning: "Her hak ve makam, onun hakkını veren ehil kimselere yakışır.", deger: "Sorumluluk Bilinci" },
+            { id: 79, before: "Sabreden derviş,", missing: "muradına", after: "ermiş.", options: ["muradına", "menzile", "hedefe", "huzura"], meaning: "Zorluklara sabırla göğüs geren kimse arzuladığı amaca kavuşur.", deger: "Sabır ve Emek" },
+            { id: 80, before: "Emek olmadan", missing: "yemek", after: "olmaz.", options: ["yemek", "ekmek", "kısmet", "kazanç"], meaning: "Alın teri dökmeden, çaba göstermeden helal bir kazanç sağlanamaz.", deger: "Sabır ve Emek" },
+            { id: 81, before: "Sabır acıdır,", missing: "meyvesi", after: "tatlıdır.", options: ["meyvesi", "sonu", "kârı", "tadı"], meaning: "Sabretmek zor gelse de sonunda ulaşılan başarı büyük mutluluk verir.", deger: "Sabır ve Emek" },
+            { id: 82, before: "Zahmetsiz", missing: "rahmet", after: "olmaz.", options: ["rahmet", "kısmet", "nimet", "kazanç"], meaning: "Büyük hedeflere ancak meşakkat ve gayretle ulaşılabilir.", deger: "Sabır ve Emek" },
+            { id: 83, before: "Tarlada izi olmayanın, harmanda", missing: "yüzü", after: "olmaz.", options: ["yüzü", "hakkı", "payı", "aşı"], meaning: "Üretime katkı vermeyen kimsenin kazanç talep etmeye hakkı yoktur.", deger: "Sabır ve Emek" },
+            { id: 84, before: "Bağa bak üzüm olsun, yemeye", missing: "yüzün", after: "olsun.", options: ["yüzün", "hakkın", "iştahın", "keyfin"], meaning: "Bir şeyden faydalanmak isteyen insan önceden ona emek harcamalıdır.", deger: "Sabır ve Emek" },
+            { id: 85, before: "Akarsu", missing: "pislik", after: "tutmaz.", options: ["pislik", "yosun", "çöp", "leke"], meaning: "Sürekli hareket halinde ve çalışkan olan kimseye kötülük bulaşmaz.", deger: "Sabır ve Emek" },
+            { id: 86, before: "Sora sora", missing: "Bağdat", after: "bulunur.", options: ["Bağdat", "Kâbe", "menzil", "yol"], meaning: "Danışmaktan çekinmeyen kimse en zor hedeflere bile kolayca ulaşır.", deger: "Sabır ve Emek" },
+            { id: 87, before: "Aza kanaat etmeyen,", missing: "çoğu", after: "hiç bulamaz.", options: ["çoğu", "varlığı", "kısmeti", "bereketi"], meaning: "Eldeki küçük nimetlere şükretmeyenler büyük zenginliğe kavuşamazlar.", deger: "Sabır ve Emek" },
+            { id: 88, before: "Hazıra", missing: "dağlar", after: "dayanmaz.", options: ["dağlar", "hanlar", "ambarlar", "kasalar"], meaning: "Sürekli tüketip üretmeyen insanın elindeki en büyük servet bile biter.", deger: "Sabır ve Emek" },
+            { id: 89, before: "Yazın terleyen,", missing: "kışın", after: "üşümez.", options: ["kışın", "sonra", "ömründe", "evinde"], meaning: "Vaktinde çok çalışıp tedbir alan insan sonradan zorluk çekmez.", deger: "Sabır ve Emek" },
+            { id: 90, before: "Yalancının evi yanmış,", missing: "kimse", after: "inanmamış.", options: ["kimse", "komşu", "ahali", "dostu"], meaning: "Sürekli yalan söyleyen biri doğruyu söylese bile kimseyi inandıramaz.", deger: "Sabır ve Emek" },
+            { id: 91, before: "Mızrak çuvala", missing: "sığmaz", after: ".", options: ["sığmaz", "girmez", "batmaz", "konmaz"], meaning: "Büyük ve açık gerçekler ne kadar gizlenmek istense de saklanamaz.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 92, before: "Bozacının şahidi", missing: "şıracıdır", after: ".", options: ["şıracıdır", "komşudur", "ortaktır", "yoldaştır"], meaning: "Kötü ve kusurlu kimseleri yine kendisi gibi olanlar savunur.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 93, before: "Su bulanmayınca", missing: "durulmaz", after: ".", options: ["durulmaz", "akmaz", "arınmaz", "temizlenmez"], meaning: "Zorlu tartışmalar ve imtihanlar yaşanmadan gerçek huzura varılamaz.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 94, before: "Nerde birlik, orada", missing: "dirlik", after: ".", options: ["dirlik", "huzur", "bereket", "kuvvet"], meaning: "Birlik ve beraberliğin olduğu toplumlarda düzen ve mutluluk hâkim olur.", deger: "Dayanışma" },
+            { id: 95, before: "Ateş düştüğü", missing: "yeri", after: "yakar.", options: ["yeri", "kalbi", "evi", "ocağı"], meaning: "Bir felaketin acısını en derinden ancak o felakete uğrayan kişi hisseder.", deger: "Empati" },
+            { id: 96, before: "Aç ne yemez, tok ne", missing: "demez", after: ".", options: ["demez", "bilmez", "anlamaz", "görmez"], meaning: "Darda olan her aşa razı olurken, varlıklı olan her şeye kusur bulur.", deger: "Empati" },
+            { id: 97, before: "Ağlarsa anam ağlar, gerisi", missing: "yalan", after: "ağlar.", options: ["yalan", "boşa", "az", "sonra"], meaning: "İnsanın kederine en içten ve karşılıksız yanan kişi annesidir.", deger: "Empati" },
+            { id: 98, before: "Yarası olan", missing: "gocunur", after: ".", options: ["gocunur", "sızlar", "ağlar", "kaçınır"], meaning: "Bir kusuru veya hatası olan kimse, o konu açıldığında üzerine alınır.", deger: "Empati" },
+            { id: 99, before: "Düşenin", missing: "dostu", after: "olmaz.", options: ["dostu", "arkadaşı", "yoldaşı", "yardımcısı"], meaning: "Varlığını kaybeden kişilerin etrafındaki sahte arkadaşlar dağılır.", deger: "Empati" },
+            { id: 100, before: "Derdini söylemeyen", missing: "derman", after: "bulamaz.", options: ["derman", "çare", "ilaç", "dost"], meaning: "İnsan sıkıntılarını güvenilir dostlarıyla paylaşmalı, çözüm aramalıdır.", deger: "Empati" },
+            { id: 101, before: "Hatasız kul", missing: "olmaz", after: ".", options: ["olmaz", "kalmaz", "bulunmaz", "doğmaz"], meaning: "Her insan yanılgıya düşebilir; hoşgörülü ve bağışlayıcı olmak gerekir.", deger: "Sorumluluk Bilinci" },
+            { id: 102, before: "Bugünkü işini", missing: "yarına", after: "bırakma.", options: ["yarına", "akşama", "sonraya", "haftaya"], meaning: "İşleri ertelemek tembelliğe yol açar; zamanında yapmak huzur verir.", deger: "Sorumluluk Bilinci" },
+            { id: 103, before: "Tembele iş buyur, sana", missing: "akıl", after: "öğretsin.", options: ["akıl", "öğüt", "masal", "bahane"], meaning: "Çalışmayı sevmeyen kimse, iş yapmamak için binbir mazeret üretir.", deger: "Sorumluluk Bilinci" },
+            { id: 104, before: "Erken kalkan", missing: "yol", after: "alır.", options: ["yol", "ödül", "aş", "kâr"], meaning: "Günün bereketinden yararlanıp işine erken başlayan başarıya ulaşır.", deger: "Sorumluluk Bilinci" },
+            { id: 105, before: "İşleyen demir", missing: "paslanmaz", after: ".", options: ["paslanmaz", "eskimez", "kırılmaz", "aşınmaz"], meaning: "Sürekli çalışan insan hem yeteneklerini geliştirir hem de dinç kalır.", deger: "Sabır ve Emek" },
+            { id: 106, before: "Yazın başı pişenin, kışın", missing: "aşı", after: "pişer.", options: ["aşı", "ekmeği", "çorbası", "hanesi"], meaning: "Zamanında fedakarlıkla çalışan kimse, ileride rahat ve bolluk içinde yaşar.", deger: "Sabır ve Emek" },
+            { id: 107, before: "Acele işe", missing: "şeytan", after: "karışır.", options: ["şeytan", "keder", "zarar", "hata"], meaning: "Düşünülmeden telaşla yapılan işlerde hata ve kusur çok olur.", deger: "Sabır ve Emek" },
+            { id: 108, before: "Geç olsun da", missing: "güç", after: "olmasın.", options: ["güç", "zor", "dar", "kötü"], meaning: "Bir işin gecikmesi önemli değildir; sağlam ve selametle bitmesi esastır.", deger: "Sabır ve Emek" },
+            { id: 109, before: "Yazın terleyen, kışın", missing: "üşümez", after: ".", options: ["üşümez", "ağlamaz", "titremez", "düşmez"], meaning: "Vaktinde emek harcayan kimse zor günleri rahatça atlatır.", deger: "Sabır ve Emek" },
+            { id: 110, before: "Tatlı dil yılanı", missing: "deliğinden", after: "çıkarır.", options: ["deliğinden", "yuvasından", "ininden", "dağından"], meaning: "Nazik ve yapıcı bir üslup en inatçı ve sert insanları dahi ikna eder.", deger: "Nezaket ve Hoşgörü" },
+            { id: 111, before: "Güneş girmeyen eve", missing: "doktor", after: "girer.", options: ["doktor", "hastalık", "keder", "soğuk"], meaning: "Temizlik, güneş ve havadarlık sağlık için vazgeçilmez şartlardır.", deger: "Sağlık ve Temizlik" },
+            { id: 112, before: "Akıl akıldan", missing: "üstündür", after: ".", options: ["üstündür", "güçlüdür", "faydalıdır", "iyidir"], meaning: "İnsan her şeyi tek başına bilemez; istişare etmek daima doğru yoldur.", deger: "İstişare ve Alçakgönüllülük" },
+            { id: 113, before: "Denize düşen", missing: "yılana", after: "sarılır.", options: ["yılana", "dalga", "kayaya", "ağaca"], meaning: "Çaresiz kalan insan kurtulmak için en tehlikeli çareye bile sığınabilir.", deger: "Tedbirlilik" },
+            { id: 114, before: "Üzüm üzüme baka baka", missing: "kararır", after: ".", options: ["kararır", "tatlanır", "olgunlaşır", "sararır"], meaning: "Arkadaş olan kimseler zamanla birbirlerinin huylarını ve ahlakını kaparlar.", deger: "Arkadaş Seçimi" },
+            { id: 115, before: "Körle yatan", missing: "şaşı", after: "kalkar.", options: ["şaşı", "topal", "hasta", "eksik"], meaning: "Kusurlu kimselerle düşüp kalkanlar onların kötü alışkanlıklarını edinirler.", deger: "Ahlak ve Çevre" },
+            { id: 116, before: "İki cambaz bir ipte", missing: "oynamaz", after: ".", options: ["oynamaz", "durmaz", "yürümez", "kalmaz"], meaning: "Aynı kurnazlığa sahip iki hilekâr birbirini kandıramaz.", deger: "Dürüstlük ve Şeffaflık" },
+            { id: 117, before: "Çıkmadık candan", missing: "umut", after: "kesilmez.", options: ["umut", "hayat", "nefes", "ümit"], meaning: "En kritik anlarda bile mücadeleyi bırakmamalı, umudu korumalıdır.", deger: "Umut ve Sebat" },
+            { id: 118, before: "Vakit", missing: "nakittir", after: ".", options: ["nakittir", "altındır", "ömürdür", "hazinedir"], meaning: "Zaman geri döndürülemeyen en büyük sermayedir, boşa harcanmamalıdır.", deger: "Zaman Bilinci" },
+            { id: 119, before: "Gözden ırak olan,", missing: "gönülden", after: "de ırak olur.", options: ["gönülden", "yürekten", "akıldan", "dilden"], meaning: "Birbirini göremeyen dostların hatırını sormak, arayı soğutmamak gerekir.", deger: "Vefa ve Hatırşinaslık" },
+            { id: 120, before: "Bülbülü altın kafese koymuşlar, yine de", missing: "vatanım", after: "demiş.", options: ["vatanım", "yuvam", "özgürlük", "ormanım"], meaning: "Hiçbir zenginlik insanın kendi hür ana yurdunun yerini tutamaz.", deger: "Vatan Sevgisi" },
+            { id: 121, before: "El elden", missing: "üstündür", after: ".", options: ["üstündür", "güçlüdür", "farklıdır", "iyidir"], meaning: "Kimse kibre kapılmamalıdır; her bilenden üstün bir bilen daima vardır.", deger: "Tevazu ve Hikmet" },
+            { id: 122, before: "Ev alma,", missing: "komşu", after: "al.", options: ["komşu", "dost", "yoldaş", "hısım"], meaning: "Huzurlu bir hayat için evin yapısından önce iyi komşular önemlidir.", deger: "Komşuluk" },
+            { id: 123, before: "Atılan ok", missing: "geri", after: "dönmez.", options: ["geri", "boşa", "yere", "yana"], meaning: "Ağızdan çıkan kırıcı sözler ve hatalı adımlar geri alınamaz.", deger: "Ölçülü Söz ve Edep" },
+            { id: 124, before: "Büyük lokma ye,", missing: "büyük", after: "söz söyleme.", options: ["büyük", "acı", "boş", "fazla"], meaning: "Gelecek hakkında kibirli ve iddialı konuşulmamalı, mütevazı olunmalıdır.", deger: "Alçakgönüllülük" },
+            { id: 125, before: "Can çıkar,", missing: "huy", after: "çıkmaz.", options: ["huy", "kan", "yol", "öz"], meaning: "Kişinin çocukken kazandığı temel karakter özellikleri ömür boyu kalıcıdır.", deger: "Karakter Eğitimi" },
+            { id: 126, before: "Gün doğmadan", missing: "neler", after: "doğar.", options: ["neler", "güneş", "umutlar", "ışık"], meaning: "En umutsuz anlarda bile ansızın yepyeni çare kapıları açılabilir.", deger: "Umut ve İyimserlik" },
+            { id: 127, before: "Kara haber", missing: "tez", after: "duyulur.", options: ["tez", "erken", "çabuk", "hemen"], meaning: "Üzüntülü durumlar çabuk yayılır; kederli olanlara hızla destek olunmalıdır.", deger: "Duyarlılık ve Paylaşım" },
+            { id: 128, before: "Kaz gelecek yerden", missing: "tavuk", after: "esirgenmez.", options: ["tavuk", "ördek", "kuş", "yumurta"], meaning: "Büyük amaçlar ve hayırlar uğruna küçük fedakarlıklardan kaçınılmaz.", deger: "Fedakarlık" },
+            { id: 129, before: "Lafla peynir gemisi", missing: "yürümez", after: ".", options: ["yürümez", "kalkmaz", "dolmaz", "yüzmez"], meaning: "Yalnızca konuşarak hedefe varılamaz; emek, gayret ve fiili iş gerekir.", deger: "Çalışkanlık ve İcraat" },
+            { id: 130, before: "Meyve veren ağaç", missing: "taşlanır", after: ".", options: ["taşlanır", "budanır", "kesilir", "sallanır"], meaning: "Üretken ve başarılı insanlara kıskançlık gösterilebilir; yılmadan üretilmelidir.", deger: "Metanet ve Üretim" },
+            { id: 131, before: "Nerede hareket, orada", missing: "bereket", after: ".", options: ["bereket", "kısmet", "huzur", "servet"], meaning: "Canlılığın, çalışkanlığın ve gayretin olduğu yerde bolluk artar.", deger: "Gayret ve Canlılık" },
+            { id: 132, before: "Öfkeyle kalkan", missing: "zararla", after: "oturur.", options: ["zararla", "pişmanlıkla", "hüzünle", "kederle"], meaning: "Öfkeyle hareket eden kimse sonradan mutlaka pişman olur.", deger: "Öfke Kontrolü" },
+            { id: 133, before: "Son pişmanlık", missing: "fayda", after: "etmez.", options: ["fayda", "kâr", "çare", "teselli"], meaning: "Fırsatlar varken aklını kullanmalı; iş işten geçtikten sonra dövünülmemelidir.", deger: "İleri Görüşlülük" },
+            { id: 134, before: "Ummadığın taş", missing: "baş", after: "yarar.", options: ["baş", "kol", "cam", "göz"], meaning: "Küçük ve önemsiz görülen kimseler hiç beklenmedik büyük etkiler yapabilir.", deger: "Kimseyi Hor Görmeme" },
+            { id: 135, before: "Abanın kadri", missing: "yağmurda", after: "bilinir.", options: ["yağmurda", "kışın", "soğukta", "ayazda"], meaning: "Dostların ve imkânların gerçek değeri muhtaç olunan zor zamanlarda anlaşılır.", deger: "Kadirşinaslık" },
+            { id: 136, before: "Acı patlıcanı", missing: "kırağı", after: "çalmaz.", options: ["kırağı", "soğuk", "dolu", "ayaz"], meaning: "Hayatın çetin imtihanlarına alışkın dirayetli insanları küçük dertler sarsamaz.", deger: "Metanet" },
+            { id: 137, before: "Akılsız başın cezasını", missing: "ayaklar", after: "çeker.", options: ["ayaklar", "gözler", "eller", "beden"], meaning: "Düşüncesizce ve plansız yapılan işlerin ceremesini insan bedeniyle öder.", deger: "Sağduyu ve Akıl" },
+            { id: 138, before: "Alma mazlumun ahını, çıkar", missing: "aheste", after: "aheste.", options: ["aheste", "yavaş", "hemen", "gizlice"], meaning: "Zulüm kalıcı değildir; ezilenlerin duası er ya da geç zalimin karşısına dikilir.", deger: "Adalet ve Merhamet" },
+            { id: 139, before: "Ava giden", missing: "avlanır", after: ".", options: ["avlanır", "kaybolur", "yorulur", "yakalanır"], meaning: "Başkalarına kuyu kazanlar eninde sonunda kendi kazdıkları kuyuya düşerler.", deger: "Mertlik" },
+            { id: 140, before: "Balık baştan", missing: "kokar", after: ".", options: ["kokar", "avlanır", "çürür", "bozulur"], meaning: "Bir düzenin bozulması en tepedeki idarecilerin tutumundan başlar.", deger: "Liderlik Sorumluluğu" },
+            { id: 141, before: "Besle kargayı, oysun", missing: "gözünü", after: ".", options: ["gözünü", "elini", "kolunu", "yüzünü"], meaning: "Nankör kimselere yapılan iyilik bazen kötülükle dönebilir; vefakâr olunmalıdır.", deger: "Vefa" },
+            { id: 142, before: "Bin bilsen de bir", missing: "bilene", after: "danış.", options: ["bilene", "büyüğe", "dosta", "yaşlıya"], meaning: "İnsan ne kadar bilgili olursa olsun ehil kişilere akıl danışmalıdır.", deger: "İstişare" },
+            { id: 143, before: "Bir fincan kahvenin", missing: "kırk", after: "yıl hatırı vardır.", options: ["kırk", "elli", "on", "yüz"], meaning: "Bize yapılan en küçük ikram ve dostluk bile ömür boyu unutulmamalıdır.", deger: "Hatırşinaslık" },
+            { id: 144, before: "Cana gelecek", missing: "mala", after: "gelsin.", options: ["mala", "mülke", "paraya", "eve"], meaning: "Hiçbir maddi kayıp insan sağlığından ve hayatından daha değerli değildir.", deger: "İnsan Hayatının Değeri" },
+            { id: 145, before: "Eğri otur,", missing: "doğru", after: "konuş.", options: ["doğru", "açık", "sakin", "mert"], meaning: "Koşullar ne olursa olsun doğrudan ve hakikatten yana tavır alınmalıdır.", deger: "Doğruluk" },
+            { id: 146, before: "Gönül kimi severse", missing: "güzel", after: "odur.", options: ["güzel", "şirin", "özel", "hoş"], meaning: "Gerçek sevgi kalpten gelir; insan sevdiğini dünyanın en güzeli görür.", deger: "Samimi Sevgi" },
+            { id: 147, before: "Kalp kalbe", missing: "karşıdır", after: ".", options: ["karşıdır", "yakındır", "ayrıdır", "bağlıdır"], meaning: "Birbirine muhabbet duyan insanların gönül bağları karşılıklıdır.", deger: "Gönül Bağı" },
+            { id: 148, before: "Yuvayı yapan", missing: "dişi", after: "kuştur.", options: ["dişi", "ana", "küçük", "akıllı"], meaning: "Ailenin huzur, birlik ve saadetinde fedakâr kadınların ve annelerin rolü büyüktür.", deger: "Aile ve Fedakarlık" },
+            { id: 149, before: "Söz gümüşse sükût", missing: "altındır", after: ".", options: ["altındır", "elmastır", "cevherdir", "nurdur"], meaning: "Yerinde konuşmak değerli olsa da susup dinlemeyi bilmek çok daha erdemlidir.", deger: "Sükûnet ve Edep" },
+            { id: 150, before: "Dost ile ye, iç; alışveriş", missing: "etme", after: ".", options: ["etme", "yapma", "katma", "bağlama"], meaning: "Maddi ve ticari hesapların manevi dostlukları yıpratmasına izin verilmemelidir.", deger: "Dostluğun Saflığı" }
+        ];
+
+        // OYUN DURUM DEĞİŞKENLERİ
+        let currentGameQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let streak = 0;
+        let maxStreak = 0;
+        let correctAnswersCount = 0;
+        let wrongAnswersCount = 0;
+        let userGameLog = [];
+        let lastHomeQuoteIndex = -1;
+
+        let jokersUsed = {
+            fifty: false,
+            meaning: false,
+            letter: false
+        };
+
+        // RASTGELE 25 SEÇİM
+        function getShuffledRandom25Questions() {
+            const poolCopy = [...fullProverbsPool];
+            let m = poolCopy.length, t, i;
+            while (m) {
+                i = Math.floor(Math.random() * m--);
+                t = poolCopy[m];
+                poolCopy[m] = poolCopy[i];
+                poolCopy[i] = t;
+            }
+            return poolCopy.slice(0, 25);
+        }
+
+        // DOĞRUDAN OYUNU BAŞLATAN FONKSİYON
+        function directStartGame() {
+            playCulturalSound('click');
+            
+            document.getElementById('homeSection').classList.add('hidden');
+            document.getElementById('endSection').classList.add('hidden');
+            document.getElementById('gameSection').classList.remove('hidden');
+
+            document.getElementById('livesContainer').classList.remove('hidden');
+            document.getElementById('livesContainer').classList.add('flex');
+            document.getElementById('scoreContainer').classList.remove('hidden');
+            document.getElementById('scoreContainer').classList.add('flex');
+            document.getElementById('progressContainer').classList.remove('hidden');
+
+            currentGameQuestions = getShuffledRandom25Questions();
+            currentQuestionIndex = 0;
+            score = 0;
+            lives = 3;
+            streak = 0;
+            maxStreak = 0;
+            correctAnswersCount = 0;
+            wrongAnswersCount = 0;
+            userGameLog = [];
+            jokersUsed = { fifty: false, meaning: false, letter: false };
+
+            updateLivesUI();
+            updateScoreUI();
+            resetJokerButtonsUI();
+
+            renderCurrentQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ANA EKRANA DÖN
+        function showHomeScreen() {
+            playCulturalSound('click');
+            document.getElementById('gameSection').classList.add('hidden');
+            document.getElementById('endSection').classList.add('hidden');
+            document.getElementById('homeSection').classList.remove('hidden');
+
+            document.getElementById('livesContainer').classList.add('hidden');
+            document.getElementById('livesContainer').classList.remove('flex');
+            document.getElementById('scoreContainer').classList.add('hidden');
+            document.getElementById('scoreContainer').classList.remove('flex');
+            document.getElementById('progressContainer').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // GÜNÜN ATASÖZÜNÜ DEĞİŞTİR
+        function refreshHomeQuote() {
+            playCulturalSound('click');
+            
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * fullProverbsPool.length);
+            } while (nextIndex === lastHomeQuoteIndex && fullProverbsPool.length > 1);
+            
+            lastHomeQuoteIndex = nextIndex;
+            const item = fullProverbsPool[nextIndex];
+            
+            const textEl = document.getElementById('homeQuoteText');
+            const meanEl = document.getElementById('homeQuoteMeaning');
+            const valEl = document.getElementById('homeQuoteValue');
+
+            if (textEl && meanEl && valEl) {
+                textEl.style.opacity = '0';
+                meanEl.style.opacity = '0';
+                valEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    textEl.innerText = `"${item.before} ${item.missing} ${item.after}"`;
+                    meanEl.innerText = item.meaning;
+                    valEl.innerText = `Kök Değer: ${item.deger}`;
+                    
+                    textEl.style.opacity = '1';
+                    meanEl.style.opacity = '1';
+                    valEl.style.opacity = '1';
+                }, 180);
+            }
+        }
+
+        // SORUYU EKRANA ÇİZME
+        function renderCurrentQuestion() {
+            const q = currentGameQuestions[currentQuestionIndex];
+            const percent = (currentQuestionIndex / 25) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('questionCounterBadge').innerText = `Soru ${currentQuestionIndex + 1} / 25`;
+            document.getElementById('badgeValueText').innerText = q.deger;
+
+            const comboBadge = document.getElementById('comboBadge');
+            if (streak >= 2) {
+                comboBadge.classList.remove('hidden');
+                comboBadge.classList.add('flex');
+                document.getElementById('comboText').innerText = `${streak}x Seri`;
+            } else {
+                comboBadge.classList.add('hidden');
+                comboBadge.classList.remove('flex');
+            }
+
+            document.getElementById('letterHintContainer').classList.add('hidden');
+            document.getElementById('hintMeaningBox').classList.add('hidden');
+
+            const quoteEl = document.getElementById('quoteDisplay');
+            quoteEl.innerHTML = `
+                <span>${q.before}</span>
+                <span id="targetSlot" class="inline-flex items-center justify-center min-w-[110px] px-3.5 py-0.5 mx-1.5 rounded-xl border-2 border-dashed border-amberGold/80 bg-amberGold/10 text-amberGold-light slot-pulse font-serif text-lg sm:text-2xl">
+                    [___]
+                </span>
+                <span>${q.after}</span>
+            `;
+
+            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full py-4 px-5 rounded-2xl card-glass border border-amberGold/30 text-white font-serif font-bold text-base sm:text-lg hover:border-amberGold hover:bg-amberGold/15 active:scale-98 transition flex items-center justify-between group cursor-pointer";
+                btn.innerHTML = `
+                    <span class="text-amber-100 group-hover:text-amberGold-light transition">${opt}</span>
+                    <i class="fa-solid fa-feather text-xs text-amberGold/40 group-hover:text-amberGold group-hover:translate-x-1 transition"></i>
+                `;
+                btn.onclick = () => handleAnswer(opt, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        // CEVAP KONTROLÜ
+        function handleAnswer(selectedWord, clickedBtn) {
+            const q = currentGameQuestions[currentQuestionIndex];
+            const isCorrect = (selectedWord === q.missing);
+
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            const slot = document.getElementById('targetSlot');
+            slot.classList.remove('slot-pulse');
+            slot.innerText = selectedWord;
+
+            if (isCorrect) {
+                playCulturalSound('dombra_correct');
+                fireConfetti();
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                correctAnswersCount++;
+
+                const gained = 100 + (streak > 1 ? (streak - 1) * 25 : 0);
+                score += gained;
+                updateScoreUI();
+
+                clickedBtn.classList.remove('card-glass', 'border-amberGold/30');
+                clickedBtn.classList.add('bg-emerald-600', 'border-emerald-400', 'text-white');
+                slot.className = "inline-flex items-center justify-center min-w-[110px] px-3.5 py-0.5 mx-1.5 rounded-xl border border-emerald-400 bg-emerald-500/20 text-emerald-300 font-serif text-lg sm:text-2xl";
+
+                userGameLog.push({
+                    number: currentQuestionIndex + 1,
+                    before: q.before,
+                    missing: q.missing,
+                    after: q.after,
+                    answered: selectedWord,
+                    isCorrect: true,
+                    meaning: q.meaning,
+                    deger: q.deger
+                });
+
+                showFeedbackModal(true, q, selectedWord);
+            } else {
+                playCulturalSound('wrong');
+                streak = 0;
+                wrongAnswersCount++;
+                lives--;
+                updateLivesUI();
+
+                clickedBtn.classList.remove('card-glass', 'border-amberGold/30');
+                clickedBtn.classList.add('bg-rose-600', 'border-rose-400', 'text-white');
+                slot.className = "inline-flex items-center justify-center min-w-[110px] px-3.5 py-0.5 mx-1.5 rounded-xl border border-rose-400 bg-rose-500/20 text-rose-300 font-serif text-lg sm:text-2xl";
+
+                allBtns.forEach(b => {
+                    if (b.innerText.trim().startsWith(q.missing)) {
+                        b.classList.add('bg-emerald-600/70', 'border-emerald-400');
+                    }
+                });
+
+                userGameLog.push({
+                    number: currentQuestionIndex + 1,
+                    before: q.before,
+                    missing: q.missing,
+                    after: q.after,
+                    answered: selectedWord,
+                    isCorrect: false,
+                    meaning: q.meaning,
+                    deger: q.deger
+                });
+
+                showFeedbackModal(false, q, selectedWord);
+            }
+        }
+
+        // TDK GERİ BİLDİRİM VE DEĞER KARTI
+        function showFeedbackModal(isCorrect, q, selectedWord) {
+            const modal = document.getElementById('feedbackModal');
+            const icon = document.getElementById('feedbackIcon');
+            const title = document.getElementById('feedbackTitle');
+            const fullQuote = document.getElementById('feedbackQuote');
+            const meaning = document.getElementById('feedbackMeaning');
+            const valueSpan = document.getElementById('feedbackValue');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+
+            if (isCorrect) {
+                icon.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 bg-emerald-500/20 border border-emerald-400/40 text-emerald-400";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+                title.innerText = "Kutlu Olsun! Doğru Cevap";
+                title.className = "text-2xl font-serif font-bold mb-1 text-emerald-400";
+            } else {
+                icon.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 bg-rose-500/20 border border-rose-400/40 text-rose-400";
+                icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                title.innerText = "Yanlış Cevap!";
+                title.className = "text-2xl font-serif font-bold mb-1 text-rose-400";
+            }
+
+            fullQuote.innerHTML = `"${q.before} <span class="text-amberGold underline decoration-amberGold underline-offset-4 font-bold">${q.missing}</span> ${q.after}"`;
+            valueSpan.innerText = q.deger;
+            meaning.innerText = q.meaning;
+
+            if (lives <= 0) {
+                nextBtn.innerHTML = `<span>Hakların Bitti! Maarif Karneni Gör</span> <i class="fa-solid fa-heart-crack text-rose-400 ml-1"></i>`;
+            } else if (currentQuestionIndex >= 24) {
+                nextBtn.innerHTML = `<span>25 Soruyu Tamamla & Karneni Gör</span> <i class="fa-solid fa-flag-checkered text-amberGold ml-1"></i>`;
+            } else {
+                nextBtn.innerHTML = `<span>Sonraki Soruya Geç (${currentQuestionIndex + 2} / 25)</span> <i class="fa-solid fa-arrow-right text-sm ml-1"></i>`;
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+        }
+
+        // SONRAKİ SORUYA GEÇİŞ
+        function nextQuestion() {
+            playCulturalSound('click');
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                if (lives <= 0 || currentQuestionIndex >= 24) {
+                    endGame();
+                } else {
+                    currentQuestionIndex++;
+                    renderCurrentQuestion();
+                }
+            }, 180);
+        }
+
+        function updateLivesUI() {
+            for (let i = 1; i <= 3; i++) {
+                const heart = document.querySelector(`.heart-${i}`);
+                if (heart) {
+                    if (i <= lives) {
+                        heart.className = `fa-solid fa-heart heart-${i} text-rose-500 scale-100 transition-all`;
+                    } else {
+                        heart.className = `fa-regular fa-heart heart-${i} text-slate-600 scale-90 transition-all`;
+                    }
+                }
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('scoreText').innerText = score;
+        }
+
+        function resetJokerButtonsUI() {
+            ['jokerFifty', 'jokerMeaning', 'jokerLetter'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            });
+        }
+
+        // JOKER 1: %50
+        function useFiftyFifty() {
+            if (jokersUsed.fifty) return;
+            playCulturalSound('ney_hint');
+            jokersUsed.fifty = true;
+
+            const q = currentGameQuestions[currentQuestionIndex];
+            const allBtns = Array.from(document.querySelectorAll('.option-btn'));
+            const wrongBtns = allBtns.filter(b => b.innerText.trim() !== q.missing);
+
+            wrongBtns.sort(() => Math.random() - 0.5).slice(0, 2).forEach(b => {
+                b.style.visibility = 'hidden';
+            });
+
+            const btn = document.getElementById('jokerFifty');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        // JOKER 2: Dede Korkut Öğüdü
+        function useMeaningHint() {
+            if (jokersUsed.meaning) return;
+            playCulturalSound('ney_hint');
+            jokersUsed.meaning = true;
+
+            const q = currentGameQuestions[currentQuestionIndex];
+            const box = document.getElementById('hintMeaningBox');
+            document.getElementById('hintMeaningText').innerText = q.meaning;
+            box.classList.remove('hidden');
+
+            const btn = document.getElementById('jokerMeaning');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        // JOKER 3: Harf İpucu
+        function useLetterHint() {
+            if (jokersUsed.letter) return;
+            playCulturalSound('ney_hint');
+            jokersUsed.letter = true;
+
+            const q = currentGameQuestions[currentQuestionIndex];
+            const firstChar = q.missing.charAt(0);
+
+            document.getElementById('hintLetterChar').innerText = firstChar;
+            document.getElementById('letterHintContainer').classList.remove('hidden');
+
+            const btn = document.getElementById('jokerLetter');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        // OYUN SONU VE KARNE
+        function endGame() {
+            fireConfetti();
+            document.getElementById('gameSection').classList.add('hidden');
+            document.getElementById('endSection').classList.remove('hidden');
+            document.getElementById('progressBar').style.width = '100%';
+
+            const totalAnswered = correctAnswersCount + wrongAnswersCount;
+            const accuracy = totalAnswered > 0 ? Math.round((correctAnswersCount / totalAnswered) * 100) : 0;
+
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('finalAccuracy').innerText = `%${accuracy}`;
+            document.getElementById('finalRatio').innerText = `${correctAnswersCount} / ${wrongAnswersCount}`;
+            document.getElementById('finalStreak').innerText = `${maxStreak}x`;
+
+            const rankBadge = document.getElementById('resultRankBadge');
+            const comment = document.getElementById('resultComment');
+
+            if (accuracy >= 90) {
+                rankBadge.innerText = "🌟 Bozkır Bilgesi & Maarif Çınarı";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-amberGold/20 border border-amberGold/40 text-amberGold-light text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Kutlu olsun! 150 atasözlük hazineden gelen soruları başarıyla çözüp tüm milli kök değerlerimizi kavradın.";
+            } else if (accuracy >= 70) {
+                rankBadge.innerText = "📜 Atasözleri Muhafızı";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-turkuaz/20 border border-turkuaz/40 text-turkuaz-light text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Tebrikler! Atalarımızın hikmetli sözlerine ve dilimizin inceliklerine çok hakimsin.";
+            } else if (accuracy >= 50) {
+                rankBadge.innerText = "🔍 Bilgelik Yolcusu";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-300 text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Güzel bir gayret gösterdin. Aşağıdaki listeden çözdüğün atasözlerinin anlamlarını inceleyip hemen yeni bir 25 soru çekebilirsin!";
+            } else {
+                rankBadge.innerText = "🌱 Hevesli Çırak";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-otagKizil/20 border border-otagKizil/40 text-amber-200 text-xs font-bold uppercase tracking-wider mb-3";
+                comment.innerText = "Atasözleri tecrübe ile öğrenilir. Aşağıdaki 25 atasözünün hikmetlerini inceleyip yeni bir sete başla!";
+            }
+
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+
+            currentGameQuestions.forEach((item, idx) => {
+                const userResult = userGameLog.find(u => u.number === (idx + 1));
+                const hasAnswered = !!userResult;
+                const wasCorrect = hasAnswered && userResult.isCorrect;
+
+                const div = document.createElement('div');
+                div.className = "p-3.5 rounded-2xl bg-bozkir-950/90 border border-amberGold/20 text-xs text-left";
+                
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-slate-200 font-serif text-sm">#${idx + 1}. "${item.before} <span class="text-amberGold font-bold">${item.missing}</span> ${item.after}"</span>
+                        ${!hasAnswered 
+                            ? '<span class="text-slate-500 font-semibold">Cevaplanamadı</span>' 
+                            : wasCorrect 
+                                ? '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Doğru</span>' 
+                                : '<span class="text-rose-400 font-bold"><i class="fa-solid fa-xmark mr-1"></i>Yanlış (' + userResult.answered + ')</span>'
+                        }
+                    </div>
+                    <div class="mb-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-turkuaz/15 border border-turkuaz/30 text-turkuaz-light text-[11px] font-bold">
+                            <i class="fa-solid fa-seedling mr-1 text-[10px]"></i> Kök Değer: ${item.deger}
+                        </span>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed text-[11px]">${item.meaning}</p>
+                `;
+                reviewList.appendChild(div);
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // MODAL FONKSİYONLARI
+        function openModal(id) {
+            playCulturalSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.classList.remove('hidden');
+                setTimeout(() => m.classList.remove('opacity-0'), 10);
+            }
+        }
+
+        function closeModal(id) {
+            playCulturalSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.classList.add('opacity-0');
+                setTimeout(() => m.classList.add('hidden'), 200);
+            }
+        }
+    </script>
+</body>
+</html>

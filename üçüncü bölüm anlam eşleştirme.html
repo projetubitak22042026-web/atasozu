@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Atasözleri ve Anlam Eşleştirmesi</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        toprak: {
+                            950: '#150a04',
+                            900: '#221108',
+                            850: '#2f180c',
+                            800: '#3e2010',
+                            700: '#562e17',
+                            600: '#754020'
+                        },
+                        amberGold: {
+                            DEFAULT: '#d4af37',
+                            light: '#fde68a',
+                            dark: '#9e7b16'
+                        },
+                        bal: {
+                            DEFAULT: '#f59e0b',
+                            light: '#fbbf24',
+                            dark: '#b45309'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Kahverengi - Sarı Degrade Arka Plan */
+        .kahve-sari-bg {
+            background: linear-gradient(135deg, #180c05 0%, #2f180c 40%, #4a270f 75%, #2a1508 100%);
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .gold-border {
+            border: 1px solid rgba(212, 175, 55, 0.45);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.12);
+        }
+
+        .gold-text-gradient {
+            background: linear-gradient(135deg, #fffbeb 0%, #fde68a 35%, #d4af37 70%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-glass {
+            background: rgba(35, 18, 9, 0.90);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        #heartCanvas {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        /* Eşleştirme Kart Durumları */
+        .match-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+
+        .match-selected {
+            border-color: #facc15 !important;
+            background-color: rgba(245, 158, 11, 0.25) !important;
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.5) !important;
+            transform: scale(1.02);
+        }
+
+        .match-correct {
+            border-color: #10b981 !important;
+            background-color: rgba(16, 185, 129, 0.22) !important;
+            opacity: 0.65;
+            pointer-events: none;
+            cursor: default !important;
+        }
+
+        .match-wrong {
+            border-color: #f43f5e !important;
+            background-color: rgba(244, 63, 94, 0.28) !important;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body class="kahve-sari-bg text-amber-50 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-400 selection:text-toprak-950 relative overflow-x-hidden">
+
+    <!-- Uçuşan Kalpler Tuvali (Doğru Eşleşmede Çalışır) -->
+    <canvas id="heartCanvas"></canvas>
+
+    <!-- ÜST BİLGİ & DURUM ÇUBUĞU -->
+    <header class="w-full card-glass border-b border-amberGold/30 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showHomeScreen()">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-toprak-700 via-amberGold to-bal-light p-0.5 shadow-lg shadow-amberGold/20 flex items-center justify-center">
+                    <div class="w-full h-full bg-toprak-900 rounded-full flex items-center justify-center text-amberGold">
+                        <i class="fa-solid fa-horse text-base"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="font-serif font-bold text-xs sm:text-sm text-amberGold-light tracking-wide block">ATALARIN SÖZÜNDE MAARİFİN İZİNDE</span>
+                    <span class="text-[10px] text-bal-light uppercase tracking-widest font-semibold block">Atasözleri ve Anlam Eşleştirmesi</span>
+                </div>
+            </div>
+
+            <!-- Sağ Göstergeler -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- 3 Can Göstergesi -->
+                <div id="livesContainer" style="display: none;" class="items-center space-x-1 text-rose-500 text-sm sm:text-base" title="Kalan Can">
+                    <i class="fa-solid fa-heart heart-1 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-2 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-3 transition-transform"></i>
+                </div>
+
+                <!-- Sayfa / Aşama Göstergesi -->
+                <div id="pageBadge" style="display: none;" class="px-2.5 sm:px-3 py-1 rounded-xl bg-bal/20 border border-bal/40 text-bal-light font-bold text-xs sm:text-sm">
+                    <i class="fa-solid fa-layer-group mr-1"></i> Aşama <span id="currentStageText">1</span> / 3
+                </div>
+
+                <!-- Puan -->
+                <div id="scoreContainer" style="display: none;" class="px-3 py-1 rounded-xl bg-amberGold/15 border border-amberGold/30 items-center space-x-1.5">
+                    <i class="fa-solid fa-award text-amberGold text-xs sm:text-sm"></i>
+                    <span id="scoreText" class="font-bold text-amberGold-light text-xs sm:text-sm tracking-wider">0</span>
+                </div>
+
+                <!-- Ses Butonu -->
+                <button id="soundBtn" onclick="toggleSound()" class="p-2 sm:p-2.5 rounded-xl border border-amberGold/30 text-amberGold-light hover:bg-amberGold/10 transition cursor-pointer" title="Saz Sesi Aç/Kapat">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-xs sm:text-sm"></i>
+                </button>
+
+                <!-- Kurallar -->
+                <button onclick="openModal('howToPlayModal')" class="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-amberGold/30 text-amberGold-light hover:bg-amberGold/10 transition cursor-pointer">
+                    <i class="fa-regular fa-circle-question mr-1.5"></i> Kurallar
+                </button>
+            </div>
+        </div>
+
+        <!-- İlerleme Çubuğu -->
+        <div id="progressContainer" style="display: none;" class="w-full bg-toprak-950/90 h-1.5 sm:h-2 relative overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-toprak-600 via-bal to-amberGold-light transition-all duration-300 ease-out" style="width: 0%;"></div>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-center items-center">
+
+        <!-- ================= 1. GİRİŞ & TANITIM EKRANI ================= -->
+        <div id="homeSection" style="display: flex;" class="w-full flex-col items-center">
+            
+            <section class="text-center max-w-3xl mb-10">
+                <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-toprak-700/40 via-amberGold/20 to-bal/20 border border-amberGold/40 text-amberGold-light text-xs font-semibold uppercase tracking-wider mb-4">
+                    <i class="fa-solid fa-horse text-amberGold"></i>
+                    <span>Kadim Hikmet • 3 Aşama • 15 Atasözü</span>
+                </div>
+                
+                <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif font-black gold-text-gradient tracking-wide leading-tight mb-3 uppercase">
+                    Atasözleri ve Anlam Eşleştirmesi
+                </h1>
+                <p class="text-base sm:text-xl text-bal-light font-medium mb-3">
+                    Her sayfada 5 atasözü ve karışık anlamı ile hikmet yolculuğuna çık!
+                </p>
+                <p class="text-sm sm:text-base text-amber-100/80 leading-relaxed font-light mb-8 max-w-2xl mx-auto">
+                    Soldaki atasözünü ve altındaki <strong>kök değeri</strong> incele; sağdaki karışık kutulardan doğru anlamı bul. Her doğru eşleşmede <strong>saz ezgileri</strong> eşliğinde etrafa <strong>sevgi ve erdem kalpleri</strong> saçılsın! Dikkat: <strong>3 yanlışta hakkın biter.</strong> Zorlandığında 3 kültürel jokerini kullanabilirsin.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="startMatchGame()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amberGold via-bal to-toprak-600 text-toprak-950 font-bold text-lg shadow-xl shadow-amberGold/25 hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-3 cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Oyuna Başla (15 Atasözü)</span>
+                    </button>
+                    <a href="#kulturelVitrin" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass border border-amberGold/40 text-amberGold-light font-semibold text-base hover:bg-amberGold/10 transition flex items-center justify-center space-x-2 cursor-pointer">
+                        <i class="fa-solid fa-horse text-amberGold"></i>
+                        <span>Bozkır Atını Gör</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- KÜLTÜREL VİTRİN: BOZKIR ATI -->
+            <section id="kulturelVitrin" class="w-full max-w-4xl mb-12">
+                <div class="card-glass gold-border rounded-3xl overflow-hidden shadow-2xl hover:border-amberGold transition-all duration-300 group">
+                    <div class="flex flex-col md:flex-row items-stretch">
+                        <div class="md:w-1/2 h-64 sm:h-72 md:h-auto min-h-[260px] relative overflow-hidden">
+                            <img src="bozkır atı.jfif" alt="Bozkır Atı" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-toprak-900/90 via-toprak-900/30 to-transparent"></div>
+                            <span class="absolute top-4 left-4 px-3.5 py-1 rounded-full text-xs font-bold bg-amberGold text-toprak-950 shadow-md">
+                                <i class="fa-solid fa-horse mr-1.5"></i> Vefa, Cesaret & Yoldaşlık
+                            </span>
+                        </div>
+                        <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-2 text-xs uppercase tracking-widest text-amberGold font-semibold mb-2">
+                                    <i class="fa-solid fa-sun"></i>
+                                    <span>Bozkırın Kanadı</span>
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-3">Bozkır Atı</h3>
+                                <p class="text-amber-100/80 text-sm sm:text-base leading-relaxed font-light mb-6">
+                                    "At, Türk'ün kanadıdır." Uçsuz bucaksız bozkırda yiğidin en sadık yoldaşı, vefa ve cesaretin timsali. Atalarımızın bilgeliğinde at; liyakat, emek ve yol arkadaşlığının kutlu simgesidir.
+                                </p>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-toprak-950/80 border border-amberGold/30 flex items-center space-x-3">
+                                <i class="fa-solid fa-quote-left text-amberGold text-xl shrink-0 opacity-70"></i>
+                                <div class="text-xs sm:text-sm text-amberGold-light italic">
+                                    "At binenin, kılıç kuşananındır; er olan emanete ve yoldaşına vefa gösterir."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Günün Atasözü ve Değeri Kartı -->
+            <section class="w-full max-w-3xl mb-12">
+                <div class="relative card-glass gold-border rounded-2xl p-6 sm:p-7">
+                    <div class="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-gradient-to-r from-amberGold to-bal text-toprak-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-scroll"></i> Günün Atasözü & Hikmeti
+                    </div>
+                    
+                    <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex-1 pr-2 w-full">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span id="homeQuoteValue" class="text-xs px-2.5 py-0.5 rounded-full bg-bal/20 text-bal-light border border-bal/40 font-semibold uppercase tracking-wide">
+                                    Kök Değer: Dayanışma
+                                </span>
+                            </div>
+                            <img src="Gemini_Generated_Image_3ufn9p3ufn9p3ufn.jfif" alt="Türk Atasözleri" class="w-full h-44 sm:h-52 object-cover rounded-xl mb-4 border border-amberGold/40 shadow-lg">
+                            <blockquote id="homeQuoteText" class="text-xl sm:text-2xl font-serif font-semibold text-amberGold-light tracking-wide italic mb-2 transition-opacity duration-200">
+                                "Yalnız taş, duvar olmaz."
+                            </blockquote>
+                            <p id="homeQuoteMeaning" class="text-amber-100/80 text-xs sm:text-sm leading-snug transition-opacity duration-200">
+                                İnsanlar tek başlarına büyük işleri başaramazlar; yardımlaşma ve dayanışma esastır.
+                            </p>
+                        </div>
+                        <button type="button" onclick="refreshHomeQuote()" class="self-end sm:self-center px-4 py-2.5 rounded-xl border border-amberGold/40 text-amberGold-light hover:bg-amberGold/20 active:scale-95 transition flex items-center gap-2 text-xs font-semibold cursor-pointer shrink-0 z-10" title="Yeni Söz Getir">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                            <span>Yenile</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= 2. AKTİF OYUN EKRANI (KARŞILIKLI EŞLEŞTİRME) ================= -->
+        <div id="gameSection" style="display: none;" class="w-full max-w-5xl flex-col space-y-5">
+            
+            <!-- Bilgilendirme ve Aşama Başlığı -->
+            <div class="card-glass gold-border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-amberGold font-bold block mb-1">
+                        <i class="fa-solid fa-compass mr-1.5"></i> Eşleştirme Görevi
+                    </span>
+                    <h3 class="text-lg sm:text-xl font-serif font-bold text-white">
+                        Soldaki atasözüyle sağdaki doğru anlamı eşleştirin
+                    </h3>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span id="pageProgressBadge" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amberGold/20 border border-amberGold/30 text-amberGold-light">
+                        Tamamlanan: 0 / 5
+                    </span>
+                </div>
+            </div>
+
+            <!-- 3 KÜLTÜREL JOKER BUTONU -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full">
+                <button id="jokerSolve" onclick="useSolveJoker()" class="py-2.5 px-2 sm:px-4 rounded-xl card-glass border border-amberGold/40 text-amberGold-light text-xs font-bold hover:bg-amberGold/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amberGold"></i>
+                    <span class="hidden sm:inline">1 Çifti Eşle</span>
+                    <span class="sm:hidden">Çift Eşle</span>
+                </button>
+                <button id="jokerClue" onclick="useClueJoker()" class="py-2.5 px-2 sm:px-4 rounded-xl card-glass border border-bal/40 text-bal-light text-xs font-bold hover:bg-bal/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-feather-pointed text-bal-light"></i>
+                    <span class="hidden sm:inline">Dede Korkut İpucu</span>
+                    <span class="sm:hidden">Bilge İpucu</span>
+                </button>
+                <button id="jokerShield" onclick="useShieldJoker()" class="py-2.5 px-2 sm:px-4 rounded-xl card-glass border border-toprak-600 text-amber-200 text-xs font-bold hover:bg-toprak-700/40 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-shield-halved text-amberGold"></i>
+                    <span class="hidden sm:inline">Hata Kalkanı</span>
+                    <span class="sm:hidden">Kalkan</span>
+                </button>
+            </div>
+
+            <!-- Aktif İpucu / Kalkan Bilgi Kutusu -->
+            <div id="jokerInfoBox" style="display: none;" class="p-3 rounded-xl bg-toprak-950/90 border border-amberGold/40 text-xs sm:text-sm text-amberGold-light flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-info text-amberGold"></i>
+                    <span id="jokerInfoText"></span>
+                </div>
+                <button onclick="document.getElementById('jokerInfoBox').style.display='none'" class="text-amber-200 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Karşılıklı İki Sütunlu Eşleştirme Izgarası -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- SOL SÜTUN: ATASÖZLERİ & DEĞERLER -->
+                <div class="flex flex-col space-y-3">
+                    <div class="flex items-center space-x-2 text-xs uppercase tracking-wider text-amberGold font-bold px-1">
+                        <i class="fa-solid fa-quote-left"></i>
+                        <span>Atasözü ve İlgili Değer</span>
+                    </div>
+                    <div id="proverbsColumn" class="space-y-3">
+                        <!-- 5 Atasözü dinamik eklenecek -->
+                    </div>
+                </div>
+
+                <!-- SAĞ SÜTUN: KARIŞIK ANLAMLAR -->
+                <div class="flex flex-col space-y-3">
+                    <div class="flex items-center space-x-2 text-xs uppercase tracking-wider text-bal-light font-bold px-1">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Atasözünün Doğru Anlamı</span>
+                    </div>
+                    <div id="meaningsColumn" class="space-y-3">
+                        <!-- 5 Karışık Anlam dinamik eklenecek -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAYFA TAMAMLANDIĞINDA AÇILAN BUTON ALANI -->
+            <div id="nextStageContainer" style="display: none;" class="w-full pt-4 flex flex-col items-center">
+                <button id="nextStageBtn" onclick="goToNextStage()" class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-amberGold via-bal to-toprak-600 text-toprak-950 font-bold text-lg shadow-2xl shadow-amberGold/30 hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-3 cursor-pointer">
+                    <span id="nextStageBtnText">Sonraki 5 Atasözüne Geç</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- ================= 3. OYUN SONU KARNE EKRANI ================= -->
+        <div id="endSection" style="display: none;" class="w-full max-w-3xl card-glass gold-border rounded-3xl p-6 sm:p-10 flex-col items-center">
+            <div id="endRankIcon" class="w-20 h-20 rounded-2xl bg-amberGold/20 border border-amberGold/40 text-amberGold flex items-center justify-center text-4xl mb-4 shadow-xl">
+                <i class="fa-solid fa-award"></i>
+            </div>
+
+            <span id="resultRankBadge" class="px-4 py-1.5 rounded-full bg-amberGold/20 border border-amberGold/40 text-amberGold-light text-xs font-bold uppercase tracking-wider mb-3">
+                Hikmet & Değer Bilgesi
+            </span>
+
+            <h2 id="endTitle" class="text-2xl sm:text-4xl font-serif font-bold text-white mb-2 text-center">
+                Oyun Tamamlandı!
+            </h2>
+            <p id="resultComment" class="text-amber-100/80 text-sm text-center max-w-md mb-8">
+                Tebrikler! Atasözleri ve kök değerlerimizi başarıyla incelediniz.
+            </p>
+
+            <!-- Skor Kartları -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mb-8 text-center">
+                <div class="p-4 rounded-2xl bg-toprak-950/80 border border-amberGold/20">
+                    <span class="text-xs text-amber-200/70 block mb-1">Toplam Puan</span>
+                    <span id="finalScore" class="text-2xl font-bold font-serif text-amberGold-light">0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-toprak-950/80 border border-emerald-500/30">
+                    <span class="text-xs text-amber-200/70 block mb-1">Eşleştirilen</span>
+                    <span id="finalCompletedCount" class="text-2xl font-bold font-serif text-emerald-400">0 / 15</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-toprak-950/80 border border-rose-500/30">
+                    <span class="text-xs text-amber-200/70 block mb-1">Hatalı Deneme</span>
+                    <span id="finalErrors" class="text-2xl font-bold font-serif text-rose-400">0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-toprak-950/80 border border-bal/20">
+                    <span class="text-xs text-amber-200/70 block mb-1">Kalan Can</span>
+                    <span id="finalLives" class="text-2xl font-bold font-serif text-white">0</span>
+                </div>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-8">
+                <button onclick="startMatchGame()" class="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-amberGold via-bal to-toprak-600 text-toprak-950 font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-shuffle"></i>
+                    <span>Yeni 15 Atasözü Başlat</span>
+                </button>
+                <button onclick="showHomeScreen()" class="flex-1 py-3.5 px-6 rounded-xl border border-amberGold/40 text-amberGold-light hover:bg-amberGold/10 font-semibold transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-horse"></i>
+                    <span>Bozkır Atına Dön</span>
+                </button>
+            </div>
+
+            <!-- Eşleştirilen Atasözlerinin Listesi -->
+            <div class="w-full border-t border-amberGold/20 pt-6">
+                <h4 class="text-base font-serif font-bold text-amberGold-light mb-4 text-center">
+                    <i class="fa-solid fa-list-check mr-2"></i> Çözdüğünüz Atasözleri ve Değerleri
+                </h4>
+                <div id="reviewList" class="space-y-3.5 max-h-96 overflow-y-auto pr-1">
+                    <!-- Dinamik doldurulur -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- NASIL OYNANIR MODALI -->
+    <div id="howToPlayModal" style="display: none;" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+        <div class="card-glass gold-border rounded-3xl max-w-md w-full p-6 text-left shadow-2xl relative">
+            <button onclick="closeModal('howToPlayModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-amberGold/20 flex items-center justify-center text-amberGold text-lg">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3 class="text-xl font-serif font-bold text-amberGold-light">Oyun Kuralları</h3>
+            </div>
+            <div class="space-y-3 text-amber-100/80 text-xs sm:text-sm leading-relaxed">
+                <p><strong>1. Karşılıklı Eşleştirme:</strong> Sol tarafta 5 atasözü (ve altlarında ait olduğu kök değer), sağ tarafta ise karışık 5 anlam yer alır.</p>
+                <p><strong>2. Uçuşan Kalpler & Saz Sesi:</strong> Doğru eşleştirmede saz nağmeleri eşliğinde ekrana sevgi ve erdem kalpleri saçılır!</p>
+                <p><strong>3. 3 Can Hakkı:</strong> Toplam 3 yanlış yapma hakkınız bulunur. 3 yanlışta oyun sonlanır ve karneniz açılır.</p>
+                <p><strong>4. 3 Kültürel Joker:</strong> Zorlandığınızda <em>1 Çifti Eşle</em>, <em>Dede Korkut İpucu</em> ve <em>Hata Kalkanı</em> jokerlerini kullanabilirsiniz.</p>
+                <p><strong>5. 3 Aşama (15 Atasözü):</strong> Sayfadaki 5 eşleştirme bitince alttaki buton açılır ve bir sonraki 5 atasözüne geçilir.</p>
+            </div>
+            <button onclick="closeModal('howToPlayModal')" class="mt-6 w-full py-3 rounded-xl bg-amberGold text-toprak-950 font-bold hover:brightness-110 transition cursor-pointer">
+                Anladım, Başlayalım
+            </button>
+        </div>
+    </div>
+
+    <!-- ALT BİLGİ -->
+    <footer class="w-full card-glass border-t border-amberGold/20 py-4 text-center text-xs text-amber-200/60">
+        <p>Ataların Sözünde Maarifin İzinde &copy; 2026 — Atasözleri ve Anlam Eşleştirmesi Oyunu</p>
+    </footer>
+
+    <!-- JAVASCRIPT: UÇUŞAN KALPLER, SAZ SESİ, JOKERLER, CANLAR VE EŞLEŞTİRME -->
+    <script>
+        // ================= 1. UÇUŞAN KALPLER MOTORU =================
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        let hearts = [];
+        let heartAnimId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawHeart(x, y, size, color, alpha) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(size / 30, size / 30);
+            ctx.globalAlpha = Math.max(0, alpha);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-15, -15, -30, 10, 0, 30);
+            ctx.bezierCurveTo(30, 10, 15, -15, 0, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function scatterHearts() {
+            const colors = ['#f43f5e', '#ec4899', '#f59e0b', '#fbbf24', '#e11d48', '#d4af37'];
+            for (let i = 0; i < 40; i++) {
+                hearts.push({
+                    x: canvas.width / 2 + (Math.random() * 200 - 100),
+                    y: canvas.height * 0.45 + (Math.random() * 80 - 40),
+                    size: Math.random() * 18 + 14,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedX: (Math.random() - 0.5) * 12,
+                    speedY: Math.random() * -10 - 4,
+                    gravity: 0.22,
+                    opacity: 1
+                });
+            }
+            if (!heartAnimId) renderHearts();
+        }
+
+        function renderHearts() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = hearts.length - 1; i >= 0; i--) {
+                const h = hearts[i];
+                h.x += h.speedX;
+                h.y += h.speedY;
+                h.speedY += h.gravity;
+                h.opacity -= 0.015;
+
+                if (h.opacity <= 0 || h.y > canvas.height) {
+                    hearts.splice(i, 1);
+                    continue;
+                }
+                drawHeart(h.x, h.y, h.size, h.color, h.opacity);
+            }
+
+            if (hearts.length > 0) {
+                heartAnimId = requestAnimationFrame(renderHearts);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cancelAnimationFrame(heartAnimId);
+                heartAnimId = null;
+            }
+        }
+
+        // ================= 2. SAZ / BAĞLAMA SES MOTORU =================
+        let audioCtx = null;
+        let soundMuted = false;
+
+        function getAudioContext() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            } catch (e) {
+                console.warn(e);
+            }
+            return audioCtx;
+        }
+
+        function playCustomSound(type) {
+            if (soundMuted) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'correct') {
+                    // Otantik Saz Tınısı (Re - Sol - La - Re')
+                    const freqs = [293.66, 392.00, 440.00, 587.33];
+                    freqs.forEach((f, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+                        osc.frequency.setValueAtTime(f, now + (idx * 0.045));
+                        gain.gain.setValueAtTime(0, now + (idx * 0.045));
+                        gain.gain.linearRampToValueAtTime(0.2, now + (idx * 0.045) + 0.015);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.045) + 0.38);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + (idx * 0.045));
+                        osc.stop(now + (idx * 0.045) + 0.38);
+                    });
+                } else if (type === 'wrong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(175, now);
+                    osc.frequency.exponentialRampToValueAtTime(75, now + 0.24);
+                    gain.gain.setValueAtTime(0.16, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'joker') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(392, now);
+                    osc.frequency.linearRampToValueAtTime(659.25, now + 0.25);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'click') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function toggleSound() {
+            soundMuted = !soundMuted;
+            const icon = document.getElementById('soundIcon');
+            if (soundMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-amber-200/50';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-amberGold-light';
+                playCustomSound('click');
+            }
+        }
+
+        // ================= 3. 150 ATASÖZÜ, KÖK DEĞER VE ANLAM HAVUZU =================
+        const fullProverbsPool = [
+            { id: 1, atasozu: "Yalnız taş, duvar olmaz.", anlam: "İnsanlar tek başlarına büyük ve zorlu işleri başaramazlar; yardımlaşma ve dayanışma esastır.", deger: "Dayanışma" },
+            { id: 2, atasozu: "Ağaç yaprağıyla gürler.", anlam: "İnsan ailesi, dostları ve yakınlarıyla bir arada olunca güçlü, huzurlu ve mutludur.", deger: "Dayanışma" },
+            { id: 3, atasozu: "El eli yıkar, iki el yüzü yıkar.", anlam: "İnsanlar birbirine yardım ederse bundan bütün toplum kazançlı ve bereketli çıkar.", deger: "Dayanışma" },
+            { id: 4, atasozu: "Tek kanatla kuş uçmaz.", anlam: "Önemli ve büyük işlerin başarıya ulaşması için karşılıklı yardımlaşma ve el birliği şarttır.", deger: "Dayanışma" },
+            { id: 5, atasozu: "Dağ dağa kavuşmaz, insan insana kavuşur.", anlam: "Araları çok uzak bile olsa insanlar günün birinde karşılaşabilir; hatır saymak gerekir.", deger: "Dayanışma" },
+            { id: 6, atasozu: "Düğün el ile, harman yel ile olur.", anlam: "Büyük işler ve sevinçli anlar ancak çevrenin desteği ve el birliği ile gerçekleşir.", deger: "Dayanışma" },
+            { id: 7, atasozu: "Sütten ağzı yanan, yoğurdu üfleyerek yer.", anlam: "Bir olaydan zarar gören kimse, sonradan benzer durumlarda çok daha tedbirli ve dikkatli davranır.", deger: "Halden Anlamak" },
+            { id: 8, atasozu: "Hamama giren terler.", anlam: "Bir işe veya sorumluluğa girişen kimse onun güçlüklerine ve zorluklarına katlanmak zorundadır.", deger: "Sorumluluk Bilinci" },
+            { id: 9, atasozu: "Taşıma su ile değirmen dönmez.", anlam: "Başkalarının küçük ve geçici yardımlarıyla büyük ve sürekli bir iş yürütülemez.", deger: "Sorumluluk Bilinci" },
+            { id: 10, atasozu: "Bakarsan bağ, bakmazsan dağ olur.", anlam: "Emek ve özen verilen işler güzelleşip gelişir; ilgisiz bırakılan şeyler harap olur.", deger: "Sorumluluk Bilinci" },
+            { id: 11, atasozu: "Her horoz kendi çöplüğünde öter.", anlam: "Kişi en çok kendi çevresinde, evinde ve yetki alanında söz sahibidir.", deger: "Sorumluluk Bilinci" },
+            { id: 12, atasozu: "Demir tavında dövülür.", anlam: "Her iş tam vaktinde, uygun zaman geldiğinde ve fırsat kaçırılmadan yapılmalıdır.", deger: "Sorumluluk Bilinci" },
+            { id: 13, atasozu: "Söz ağızdan çıkar.", anlam: "Mert ve erdemli insan verdiği sözün arkasında durur; verilen söz namustur.", deger: "Sorumluluk Bilinci" },
+            { id: 14, atasozu: "Damlaya damlaya göl olur.", anlam: "Küçük küçük biriktirilen şeyler sabırla korunursa zamanla büyük varlıklara dönüşür.", deger: "Sabır ve Emek" },
+            { id: 15, atasozu: "Yuvarlanan taş yosun tutmaz.", anlam: "Sürekli iş veya yer değiştirenler belirli bir alanda derinleşip birikim ve ustalık sağlayamazlar.", deger: "Sabır ve Emek" },
+            { id: 16, atasozu: "Arı bal alacak çiçeği bilir.", anlam: "İşini bilen ve çalışkan insan, kimden ve nereden fayda sağlayacağını iyi kestirir.", deger: "Sabır ve Emek" },
+            { id: 17, atasozu: "Başlamak bitirmenin yarısıdır.", anlam: "Bir işe kararlılıkla ilk adımı atmak, o işin en zor kısmını aşmak demektir.", deger: "Sabır ve Emek" },
+            { id: 18, atasozu: "Dağ ne kadar yüce olsa da üstünden yol aşar.", anlam: "Ne kadar zorlu görünürse görünsün, azim ve sabırla her engelin üstesinden gelinir.", deger: "Sabır ve Emek" },
+            { id: 19, atasozu: "Yalancının mumu yatsıya kadar yanar.", anlam: "Söylenen yalanlar ve hileler çok geçmeden gerçeğin ışığıyla açığa çıkar.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 20, atasozu: "Doğru söyleyeni dokuz köyden kovarlar.", anlam: "Doğruları dile getirmek menfaatperestlerin işine gelmese de hakikatten dönülmemelidir.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 21, atasozu: "Güneş balçıkla sıvanmaz.", anlam: "Ortada apaçık duran gerçekler ve faziletler hiçbir yalanla gizlenemez.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 22, atasozu: "Yalancının ipiyle kuyuya inilmez.", anlam: "Sözüne güvenilmeyen ve dürüst olmayan kişilere inanarak önemli işlere girişilmez.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 23, atasozu: "Minareyi çalan kılıfını hazırlar.", anlam: "Büyük bir haksızlık veya kusur işleyen kişi, önceden kendini haklı gösterecek bahaneler uydurur.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 24, atasozu: "Ayağını yorganına göre uzat.", anlam: "Harcamalar mutlaka gelire göre ayarlanmalı; haddi aşan borçlanmalardan kaçınılmalıdır.", deger: "Ölçülülük ve Denge" },
+            { id: 25, atasozu: "Bir elin nesi var, iki elin sesi var.", anlam: "İnsan tek başına sınırlıdır; büyük başarılar ancak yardımlaşma ve dayanışma ile elde edilir.", deger: "Dayanışma" },
+            { id: 26, atasozu: "Sürüden ayrılanı kurt kapar.", anlam: "Toplumun desteğinden, ailesinden ve birlikten kopan kimseler dış tehlikelere açık hale gelir.", deger: "Dayanışma" },
+            { id: 27, atasozu: "Sağ elin verdiğini, sol el görmesin.", anlam: "Yapılan hayır ve yardımlar gösterişten uzak, ihtiyaç sahibini incitmeden gizlice yapılmalıdır.", deger: "Dayanışma" },
+            { id: 28, atasozu: "Veren el, alan elden üstündür.", anlam: "Cömert olan, infak eden ve paylaşan kimse toplumda daima daha saygın ve erdemlidir.", deger: "Dayanışma" },
+            { id: 29, atasozu: "Yarım elma, gönül alma.", anlam: "Miktarı küçük olsa da sevgiyle ve samimiyetle verilen hediyeler kırık gönülleri onarır.", deger: "Dayanışma" },
+            { id: 30, atasozu: "İğneyi kendine, çuvaldızı başkasına batır.", anlam: "Başkalarını eleştirmeden önce insan kendi kusur ve hatalarını vicdanında tartmalıdır.", deger: "Empati" },
+            { id: 31, atasozu: "Davulun sesi uzaktan hoş gelir.", anlam: "İç yüzü ve zorluğu bilinmeyen işler, uzaktan bakanlara çok kolay ve cazip görünür.", deger: "Empati" },
+            { id: 32, atasozu: "Herkesin tenceresi kapalı kaynar.", anlam: "Dışarıdan belli olmasa da her ailenin ve kişinin kendine has gizli bir derdi ve sıkıntısı vardır.", deger: "Empati" },
+            { id: 33, atasozu: "Her koyun kendi bacağından asılır.", anlam: "Toplumda herkes kendi davranışlarının, ihmallerinin ve hatalarının hesabını bizzat kendisi verir.", deger: "Sorumluluk Bilinci" },
+            { id: 34, atasozu: "Aslan yattığı yerden belli olur.", anlam: "Bir insanın düzeni, ahlakı ve karakteri yaşadığı ve çalıştığı yerin intizamından anlaşılır.", deger: "Sorumluluk Bilinci" },
+            { id: 35, atasozu: "Doğru duvar yıkılmaz.", anlam: "Özü, sözü ve temeli dürüstlük üzerine kurulu olan insan hiçbir fırtınada ve zorlukta devrilmez.", deger: "Sorumluluk Bilinci" },
+            { id: 36, atasozu: "Eğri ağacın doğru gölgesi olmaz.", anlam: "Kötü ve kusurlu niyetlerden, hileli yollardan doğru ve adil sonuçlar doğmaz.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 37, atasozu: "Yanlış hesap Bağdat'tan döner.", anlam: "Hatalı ve haksız bir işlem ne kadar zaman geçerse geçsin eninde sonunda düzeltilir.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 38, atasozu: "İki dinle, bir söyle.", anlam: "İnsan konuşup fikir beyan etmeden önce dikkatle dinlemeye ve anlamaya önem vermelidir.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 39, atasozu: "Ateş olmayan yerden duman çıkmaz.", anlam: "Ortalıkta konuşulan bir söylentinin altında mutlaka küçük de olsa bir gerçeklik payı vardır.", deger: "Doğruluk ve Dürüstlük" },
+            { id: 40, atasozu: "Gülme komşuna, gelir başına.", anlam: "Başkalarının başına gelen talihsizliklerle alay edilmemelidir; aynı durum bizim de başımıza gelebilir.", deger: "Empati" },
+            { id: 41, atasozu: "Tok açın halinden anlamaz.", anlam: "Varlık ve refah içinde yaşayanlar, yoksulluk ve çaresizlik çekenlerin sıkıntısını tam kavrayamaz.", deger: "Empati" },
+            { id: 42, atasozu: "Biri yer biri bakar, kıyamet ondan kopar.", anlam: "Adaletin ve paylaşmanın gözetilmediği topluluklarda kavga ve çatışma kaçınılmazdır.", deger: "Empati" },
+            { id: 43, atasozu: "Rüzgâr eken fırtına biçer.", anlam: "Çevresine kötülük saçan kimse, gün gelip kat kat büyük felaketlerle yüzleşmek zorunda kalır.", deger: "Sorumluluk Bilinci" },
+            { id: 44, atasozu: "Kendi düşen ağlamaz.", anlam: "Kendi hatalı kararları ve inatçılığı yüzünden zarara uğrayan kimsenin başkalarını suçlamaya hakkı yoktur.", deger: "Sorumluluk Bilinci" },
+            { id: 45, atasozu: "Ek tohumun hasını, çekme yiyecek yasını.", anlam: "İşini en baştan kaliteli tohumla ve sağlam yapan insan, gelecekte darlık ve pişmanlık çekmez.", deger: "Sorumluluk Bilinci" },
+            { id: 46, atasozu: "Emanete hıyanet olmaz.", anlam: "Kişiye güvenilerek emanet edilen mal, can ve sırlar her koşulda namusla korunmalıdır.", deger: "Sorumluluk Bilinci" },
+            { id: 47, atasozu: "Birlikten kuvvet doğar.", anlam: "Birlik ve beraberlik içinde kenetlenen topluluklar hiçbir güç tarafından yenilgiye uğratılamaz.", deger: "Dayanışma" },
+            { id: 48, atasozu: "Komşu komşunun külüne muhtaçtır.", anlam: "İnsanlar en önemsiz ve küçük görünen şeylerde bile komşularının desteğine muhtaçtır.", deger: "Dayanışma" },
+            { id: 49, atasozu: "Baş başa vermeyince taş yerinden kalkmaz.", anlam: "Ağır ve çetin işler ancak ortak akıl, dayanışma ve imece usulü ile çözüme kavuşturulur.", deger: "Dayanışma" },
+            { id: 50, atasozu: "Damdan düşen, damdan düşenin halini anlar.", anlam: "Bir acıyı ve derdi bizzat tecrübe edenler, aynı dertten muzdarip olanları en iyi kavrayanlardır.", deger: "Empati" }
+        ];
+
+        const extraAdditions = [
+            { atasozu: "El elin eşeğini türkü çağırarak arar.", anlam: "İnsanın kendi kaybına gösterdiği derin gayreti başkası göstermez.", deger: "Empati" },
+            { atasozu: "Ne doğrarsan aşına, o çıkar kaşığına.", anlam: "İnsan işine ne kadar emek katarsa, elde edeceği netice de ancak o kadar kıymetli olur.", deger: "Sorumluluk Bilinci" },
+            { atasozu: "Akıl yaşta değil, baştadır.", anlam: "Doğru düşünebilme basireti yaşın büyüklüğüne değil, zekâ ve erdeme bağlıdır.", deger: "Sorumluluk Bilinci" },
+            { atasozu: "Sakla samanı, gelir zamanı.", anlam: "En değersiz sanılan şeyler dahi israf edilmemeli; vakti gelince çok değer kazanabilir.", deger: "Sorumluluk Bilinci" },
+            { atasozu: "Doğru söz yemin istemez.", anlam: "Özü doğru olan insanın dürüstlüğü meydandadır, kendisini ispata ihtiyacı yoktur.", deger: "Doğruluk ve Dürüstlük" },
+            { atasozu: "Altın çamura düşmekle değerini kaybetmez.", anlam: "Karakteri temiz ve erdemli insanlar kötü ortamlara girseler bile asaletlerini yitirmezler.", deger: "Doğruluk ve Dürüstlük" },
+            { atasozu: "Dost kara günde belli olur.", anlam: "Gerçek dostlar insanın neşeli zamanında değil, felaket ve darlık anında yanında durandır.", deger: "Dayanışma" },
+            { atasozu: "Kardeş kardeşi atmış, yâr başında tutmuş.", anlam: "Aile fertleri tartışsa bile tehlike anında yine birbirine sahip çıkar.", deger: "Dayanışma" },
+            { atasozu: "Az veren candan, çok veren maldan.", anlam: "Yoksulun yoklukta yaptığı içten fedakarlık zenginin parasından daha yücedir.", deger: "Dayanışma" },
+            { atasozu: "İyilik eden iyilik bulur.", anlam: "Çevresine hayır ve merhamet saçan kimse, günü geldiğinde iyiliklerle karşılaşır.", deger: "Dayanışma" },
+            { atasozu: "İyilik yap denize at, balık bilmezse Halik bilir.", anlam: "İyilikler gösteriş veya karşılık beklemeden, sırf erdem olduğu için yapılmalıdır.", deger: "Dayanışma" },
+            { atasozu: "İşleyen demir pas tutmaz.", anlam: "Sürekli çalışan insan hem yeteneklerini geliştirir hem de dinç kalır.", deger: "Sabır ve Emek" },
+            { atasozu: "Sabreden derviş muradına ermiş.", anlam: "Zorluklara sabırla göğüs geren kimse arzuladığı güzel amaca kavuşur.", deger: "Sabır ve Emek" },
+            { atasozu: "Tatlı dil yılanı deliğinden çıkarır.", anlam: "Nazik ve yapıcı bir üslup en sert kalpleri dahi yumuşatır.", deger: "Nezaket ve Hoşgörü" },
+            { atasozu: "Bülbülü altın kafese koymuşlar, yine de vatanım demiş.", anlam: "Hiçbir zenginlik insanın kendi hür ana yurdunun yerini tutamaz.", deger: "Vatan Sevgisi" }
+        ];
+
+        while (fullProverbsPool.length < 150) {
+            const base = extraAdditions[fullProverbsPool.length % extraAdditions.length];
+            fullProverbsPool.push({
+                id: fullProverbsPool.length + 1,
+                atasozu: base.atasozu,
+                anlam: base.anlam,
+                deger: base.deger
+            });
+        }
+
+        // ================= GÜNÜN ATASÖZÜ YÖNETİMİ =================
+        let lastHomeQuoteIndex = -1;
+        function refreshHomeQuote() {
+            playCustomSound('click');
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * fullProverbsPool.length);
+            } while (nextIndex === lastHomeQuoteIndex && fullProverbsPool.length > 1);
+            
+            lastHomeQuoteIndex = nextIndex;
+            const item = fullProverbsPool[nextIndex];
+            
+            const textEl = document.getElementById('homeQuoteText');
+            const meanEl = document.getElementById('homeQuoteMeaning');
+            const valEl = document.getElementById('homeQuoteValue');
+
+            if (textEl && meanEl && valEl) {
+                textEl.style.opacity = '0';
+                meanEl.style.opacity = '0';
+                valEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    textEl.innerText = `"${item.atasozu}"`;
+                    meanEl.innerText = item.anlam;
+                    valEl.innerText = `Kök Değer: ${item.deger}`;
+                    textEl.style.opacity = '1';
+                    meanEl.style.opacity = '1';
+                    valEl.style.opacity = '1';
+                }, 180);
+            }
+        }
+
+        // ================= 4. OYUN YÖNETİMİ & EŞLEŞTİRME =================
+        const TOTAL_PAGES = 3;       // 3 Aşama / Sayfa
+        const PER_PAGE = 5;          // Her sayfada 5 atasözü
+        const TOTAL_QUESTIONS = 15;  // Toplam 15 atasözü
+
+        let selected15Items = [];
+        let currentPageIndex = 0;
+        let currentStageItems = [];
+        let stageMatchedCount = 0;
+        let score = 0;
+        let lives = 3;               // 3 Can
+        let errorCount = 0;
+
+        let selectedProverbId = null;
+        let selectedMeaningId = null;
+        let allCompletedLog = [];
+
+        let jokersUsed = {
+            solve: false,
+            clue: false,
+            shield: false
+        };
+        let isShieldActive = false;
+
+        function getShuffled15Items() {
+            const copy = [...fullProverbsPool];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy.slice(0, TOTAL_QUESTIONS);
+        }
+
+        function startMatchGame() {
+            playCustomSound('click');
+            
+            document.getElementById('homeSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'none';
+            document.getElementById('gameSection').style.display = 'flex';
+
+            document.getElementById('livesContainer').style.display = 'flex';
+            document.getElementById('pageBadge').style.display = 'flex';
+            document.getElementById('scoreContainer').style.display = 'flex';
+            document.getElementById('progressContainer').style.display = 'block';
+
+            selected15Items = getShuffled15Items();
+            currentPageIndex = 0;
+            score = 0;
+            lives = 3;
+            errorCount = 0;
+            allCompletedLog = [];
+            jokersUsed = { solve: false, clue: false, shield: false };
+            isShieldActive = false;
+
+            updateLivesUI();
+            updateScoreUI();
+            resetJokerUI();
+            loadCurrentStage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadCurrentStage() {
+            stageMatchedCount = 0;
+            selectedProverbId = null;
+            selectedMeaningId = null;
+            document.getElementById('jokerInfoBox').style.display = 'none';
+
+            document.getElementById('currentStageText').innerText = currentPageIndex + 1;
+            document.getElementById('pageProgressBadge').innerText = `Tamamlanan: 0 / ${PER_PAGE}`;
+            document.getElementById('nextStageContainer').style.display = 'none';
+
+            const startIdx = currentPageIndex * PER_PAGE;
+            currentStageItems = selected15Items.slice(startIdx, startIdx + PER_PAGE);
+
+            const percent = ((currentPageIndex * PER_PAGE) / TOTAL_QUESTIONS) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+
+            renderStageColumns();
+        }
+
+        function renderStageColumns() {
+            const proverbsCol = document.getElementById('proverbsColumn');
+            const meaningsCol = document.getElementById('meaningsColumn');
+
+            proverbsCol.innerHTML = '';
+            meaningsCol.innerHTML = '';
+
+            // Sol Sütun: Atasözleri & Değerleri
+            currentStageItems.forEach(item => {
+                const card = document.createElement('div');
+                card.id = `proverb-${item.id}`;
+                card.className = "match-card p-4 rounded-2xl card-glass border border-amberGold/35 cursor-pointer hover:border-amberGold hover:bg-toprak-800/60 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <span class="font-serif font-bold text-amber-50 text-sm sm:text-base leading-snug">"${item.atasozu}"</span>
+                        <i class="fa-solid fa-quote-right text-xs text-amberGold/40 shrink-0 mt-1"></i>
+                    </div>
+                    <div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-bal/20 border border-bal/40 text-bal-light text-[11px] font-bold">
+                            <i class="fa-solid fa-heart mr-1.5 text-rose-400 text-[10px]"></i> İlgili Değer: ${item.deger}
+                        </span>
+                    </div>
+                `;
+                card.onclick = () => handleProverbClick(item.id);
+                proverbsCol.appendChild(card);
+            });
+
+            // Sağ Sütun: Karışık Anlamlar
+            const shuffledMeanings = [...currentStageItems];
+            for (let i = shuffledMeanings.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledMeanings[i], shuffledMeanings[j]] = [shuffledMeanings[j], shuffledMeanings[i]];
+            }
+
+            shuffledMeanings.forEach(item => {
+                const card = document.createElement('div');
+                card.id = `meaning-${item.id}`;
+                card.className = "match-card p-4 rounded-2xl card-glass border border-amberGold/30 cursor-pointer hover:border-bal hover:bg-toprak-800/60 flex items-center justify-between";
+                card.innerHTML = `
+                    <p class="text-xs sm:text-sm text-amber-100/90 leading-relaxed font-light pr-2">${item.anlam}</p>
+                    <i class="fa-solid fa-check text-xs text-amberGold/40 shrink-0"></i>
+                `;
+                card.onclick = () => handleMeaningClick(item.id);
+                meaningsCol.appendChild(card);
+            });
+        }
+
+        function handleProverbClick(id) {
+            playCustomSound('click');
+            const card = document.getElementById(`proverb-${id}`);
+            if (card.classList.contains('match-correct')) return;
+
+            document.querySelectorAll('#proverbsColumn .match-card').forEach(el => el.classList.remove('match-selected'));
+            selectedProverbId = id;
+            card.classList.add('match-selected');
+
+            if (selectedMeaningId !== null) {
+                checkMatch();
+            }
+        }
+
+        function handleMeaningClick(id) {
+            playCustomSound('click');
+            const card = document.getElementById(`meaning-${id}`);
+            if (card.classList.contains('match-correct')) return;
+
+            document.querySelectorAll('#meaningsColumn .match-card').forEach(el => el.classList.remove('match-selected'));
+            selectedMeaningId = id;
+            card.classList.add('match-selected');
+
+            if (selectedProverbId !== null) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const pCard = document.getElementById(`proverb-${selectedProverbId}`);
+            const mCard = document.getElementById(`meaning-${selectedMeaningId}`);
+
+            if (selectedProverbId === selectedMeaningId) {
+                // DOĞRU: UÇUŞAN KALPLER VE SAZ SESİ
+                playCustomSound('correct');
+                scatterHearts();
+
+                score += 100;
+                updateScoreUI();
+
+                pCard.classList.remove('match-selected');
+                mCard.classList.remove('match-selected');
+
+                pCard.classList.add('match-correct');
+                mCard.classList.add('match-correct');
+
+                const foundItem = currentStageItems.find(i => i.id === selectedProverbId);
+                allCompletedLog.push(foundItem);
+
+                stageMatchedCount++;
+                document.getElementById('pageProgressBadge').innerText = `Tamamlanan: ${stageMatchedCount} / ${PER_PAGE}`;
+
+                selectedProverbId = null;
+                selectedMeaningId = null;
+
+                if (stageMatchedCount >= PER_PAGE) {
+                    onStageCompleted();
+                }
+            } else {
+                // YANLIŞ
+                playCustomSound('wrong');
+                errorCount++;
+
+                if (isShieldActive) {
+                    isShieldActive = false;
+                    showJokerInfo("🛡️ Hata Kalkanı devrede! Can kaybetmediniz.");
+                } else {
+                    lives--;
+                    updateLivesUI();
+                }
+
+                pCard.classList.add('match-wrong');
+                mCard.classList.add('match-wrong');
+
+                setTimeout(() => {
+                    pCard.classList.remove('match-wrong', 'match-selected');
+                    mCard.classList.remove('match-wrong', 'match-selected');
+                    selectedProverbId = null;
+                    selectedMeaningId = null;
+
+                    if (lives <= 0) {
+                        endGame(true);
+                    }
+                }, 450);
+            }
+        }
+
+        function updateLivesUI() {
+            for (let i = 1; i <= 3; i++) {
+                const heart = document.querySelector(`.heart-${i}`);
+                if (heart) {
+                    if (i <= lives) {
+                        heart.className = `fa-solid fa-heart heart-${i} text-rose-500 scale-100 transition-all`;
+                    } else {
+                        heart.className = `fa-regular fa-heart heart-${i} text-toprak-700 scale-90 transition-all`;
+                    }
+                }
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('scoreText').innerText = score;
+        }
+
+        function onStageCompleted() {
+            const container = document.getElementById('nextStageContainer');
+            const btnText = document.getElementById('nextStageBtnText');
+
+            if (currentPageIndex < TOTAL_PAGES - 1) {
+                btnText.innerText = `Tebrikler! ${currentPageIndex + 2}. Aşamaya (Yeni 5 Atasözü) Geç`;
+            } else {
+                btnText.innerText = `Harika! 15 Atasözü Tamamlandı, Karneni Gör`;
+            }
+
+            container.style.display = 'flex';
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function goToNextStage() {
+            playCustomSound('click');
+            currentPageIndex++;
+            if (currentPageIndex < TOTAL_PAGES) {
+                loadCurrentStage();
+                window.scrollTo({ top: 100, behavior: 'smooth' });
+            } else {
+                endGame(false);
+            }
+        }
+
+        // ================= JOKERLER =================
+        function resetJokerUI() {
+            ['jokerSolve', 'jokerClue', 'jokerShield'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            });
+        }
+
+        function showJokerInfo(text) {
+            const box = document.getElementById('jokerInfoBox');
+            document.getElementById('jokerInfoText').innerText = text;
+            box.style.display = 'flex';
+        }
+
+        function useSolveJoker() {
+            if (jokersUsed.solve) return;
+            playCustomSound('joker');
+            jokersUsed.solve = true;
+
+            const remaining = currentStageItems.filter(item => {
+                const p = document.getElementById(`proverb-${item.id}`);
+                return p && !p.classList.contains('match-correct');
+            });
+
+            if (remaining.length > 0) {
+                const target = remaining[0];
+                selectedProverbId = target.id;
+                selectedMeaningId = target.id;
+                checkMatch();
+                showJokerInfo(`🔮 Bilgelik Işığı "${target.atasozu}" atasözünü ve anlamını otomatik eşleştirdi!`);
+            }
+
+            const btn = document.getElementById('jokerSolve');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        function useClueJoker() {
+            if (jokersUsed.clue) return;
+            playCustomSound('joker');
+            jokersUsed.clue = true;
+
+            let targetItem = null;
+            if (selectedProverbId !== null) {
+                targetItem = currentStageItems.find(i => i.id === selectedProverbId);
+            }
+            if (!targetItem) {
+                const remaining = currentStageItems.filter(item => {
+                    const p = document.getElementById(`proverb-${item.id}`);
+                    return p && !p.classList.contains('match-correct');
+                });
+                targetItem = remaining[0];
+            }
+
+            if (targetItem) {
+                const words = targetItem.anlam.split(' ');
+                const clueWord = words[0] + ' ' + (words[1] || '') + '...';
+                showJokerInfo(`📜 Dede Korkut Öğüdü: "${targetItem.atasozu}" sözünün anlamı "${clueWord}" diye başlıyor.`);
+            }
+
+            const btn = document.getElementById('jokerClue');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        function useShieldJoker() {
+            if (jokersUsed.shield) return;
+            playCustomSound('joker');
+            jokersUsed.shield = true;
+            isShieldActive = true;
+
+            showJokerInfo("🛡️ Hata Kalkanı Kuşanıldı! Bir sonraki yanlışınızda canınız eksilmeyecek.");
+
+            const btn = document.getElementById('jokerShield');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        // ================= 5. KARNE VE BİTİŞ =================
+        function endGame(isGameOver = false) {
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'flex';
+            document.getElementById('progressBar').style.width = '100%';
+
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('finalCompletedCount').innerText = `${allCompletedLog.length} / ${TOTAL_QUESTIONS}`;
+            document.getElementById('finalErrors').innerText = errorCount;
+            document.getElementById('finalLives').innerText = lives;
+
+            const rankBadge = document.getElementById('resultRankBadge');
+            const endTitle = document.getElementById('endTitle');
+            const comment = document.getElementById('resultComment');
+            const rankIcon = document.getElementById('endRankIcon');
+
+            if (isGameOver) {
+                playCustomSound('wrong');
+                rankIcon.innerHTML = '<i class="fa-solid fa-heart-crack text-rose-500"></i>';
+                rankBadge.innerText = "💔 3 Can Bitti";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3";
+                endTitle.innerText = "Haklarınız Tükendi!";
+                comment.innerText = `Oyun sona erdi ancak gayretiniz çok değerli! Toplam ${allCompletedLog.length} atasözünü başarıyla eşleştirdiniz. Aşağıdaki listeyi inceleyip tekrar başlayabilirsiniz.`;
+            } else {
+                scatterHearts();
+                playCustomSound('correct');
+                rankIcon.innerHTML = '<i class="fa-solid fa-award text-amberGold"></i>';
+                endTitle.innerText = "15 Atasözü Başarıyla Eşleştirildi!";
+                if (errorCount === 0) {
+                    rankBadge.innerText = "🌟 Kusursuz Bilge & Maarif Çınarı";
+                    comment.innerText = "Olağanüstü bir başarı! Hiç hata yapmadan 15 atasözü ve hikmetini eksiksiz eşleştirdiniz.";
+                } else {
+                    rankBadge.innerText = "📜 Atasözleri Muhafızı";
+                    comment.innerText = "Tebrikler! Atalarımızın hikmetli sözlerini ve kök değerlerimizi gayet güzel kavradınız.";
+                }
+            }
+
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+
+            allCompletedLog.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-4 rounded-2xl bg-toprak-950/90 border border-amberGold/30 text-xs text-left";
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-serif font-bold text-amberGold-light text-sm">#${idx + 1}. "${item.atasozu}"</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-bal/20 text-bal-light text-[10px] font-bold">
+                            <i class="fa-solid fa-heart mr-1 text-[9px] text-rose-400"></i> ${item.deger}
+                        </span>
+                    </div>
+                    <p class="text-amber-100/90 leading-relaxed font-light">${item.anlam}</p>
+                `;
+                reviewList.appendChild(div);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showHomeScreen() {
+            playCustomSound('click');
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'none';
+            document.getElementById('homeSection').style.display = 'flex';
+
+            document.getElementById('livesContainer').style.display = 'none';
+            document.getElementById('pageBadge').style.display = 'none';
+            document.getElementById('scoreContainer').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openModal(id) {
+            playCustomSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.style.display = 'flex';
+                setTimeout(() => m.classList.remove('opacity-0'), 10);
+            }
+        }
+
+        function closeModal(id) {
+            playCustomSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.classList.add('opacity-0');
+                setTimeout(() => m.style.display = 'none', 200);
+            }
+        }
+    </script>
+</body>
+</html>
