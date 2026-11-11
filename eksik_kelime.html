@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ataların Sözünde Maarifin İzinde - Atasözleri ve Değerleri Oyunu</title>
+    <title>Atasözleri ve Kültürel Değerler Bilgi Oyunu</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
@@ -99,12 +99,26 @@
             height: 100vh;
             z-index: 100;
         }
+
+        /* Şimşek Ekran Flaş Katmanı */
+        #lightningOverlay {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(191,219,254,0.5) 60%, rgba(30,58,138,0.35) 100%);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.06s ease-out;
+        }
     </style>
 </head>
 <body class="pattern-bg text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-400 selection:text-bozkir-950 relative overflow-x-hidden">
 
-    <!-- Konfeti Çizim Tuvali -->
+    <!-- Efekt Çizim Tuvali (Konfeti & Şimşekler) -->
     <canvas id="confettiCanvas"></canvas>
+
+    <!-- Şimşek Ekran Parlaması -->
+    <div id="lightningOverlay"></div>
 
     <!-- ÜST BİLGİ & DURUM ÇUBUĞU -->
     <header class="w-full card-glass border-b border-amberGold/25 sticky top-0 z-40">
@@ -116,8 +130,8 @@
                     </div>
                 </div>
                 <div>
-                    <span class="font-serif font-bold text-xs sm:text-sm text-amberGold-light tracking-wide block">ATALARIN SÖZÜNDE MAARİFİN İZİNDE</span>
-                    <span class="text-[10px] text-turkuaz-light uppercase tracking-widest font-semibold block">Atasözleri ve Değerler Oyunu</span>
+                    <span class="font-serif font-bold text-xs sm:text-sm text-amberGold-light tracking-wide block uppercase">ATASÖZLERİ VE KÜLTÜREL DEĞERLER BİLGİ OYUNU</span>
+                    <span class="text-[10px] text-turkuaz-light uppercase tracking-widest font-semibold block">1. Bölüm: Eksik Kelimeyi Tamamla</span>
                 </div>
             </div>
 
@@ -142,9 +156,10 @@
                 </button>
 
                 <!-- Nasıl Oynanır Butonu -->
-                <button onclick="openModal('howToPlayModal')" class="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-amberGold/30 text-amberGold-light hover:bg-amberGold/10 transition">
-                    <i class="fa-regular fa-circle-question mr-1.5"></i> Kurallar
-                </button>
+                <a href="index.html" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass turkuaz-border text-turkuaz-light font-semibold text-base hover:bg-turkuaz/10 transition flex items-center justify-center space-x-2">
+    <i class="fa-solid fa-campground text-turkuaz"></i>
+    <span>Ana Otağa Dön</span>
+</a>
             </div>
         </div>
 
@@ -168,13 +183,13 @@
                 </div>
                 
                 <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif font-black turkuaz-text-gradient tracking-wide leading-tight mb-4 uppercase drop-shadow-sm">
-                    Ataların Sözünde<br>Maarifin İzinde
+                    Atasözleri ve Kültürel Değerler Bilgi Oyunu
                 </h1>
                 <p class="text-base sm:text-xl text-turkuaz-light font-medium mb-3">
-                    Atasözleri ve Kültürel Değerler Bilgi Oyunu
+                    Eksik Kelimeleri Bul, Hikmeti Keşfet!
                 </p>
                 <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light mb-8 max-w-2xl mx-auto">
-                    Kültürel mirasımızdaki en yaygın 150 atasözünü keşfedin; her oyunda <strong>rastgele 25 soruyla</strong> yarışıp kök değerlerimizi Dombra tınıları ve konfetilerle pekiştirin!
+                    Kültürel mirasımızdaki en yaygın 150 atasözünü keşfedin; her oyunda <strong>rastgele 25 soruyla</strong> yarışıp kök değerlerimizi pekiştirin! Doğrularda <strong>Dombra tınıları ve konfetiler</strong>, yanlışlarda <strong>şimşek çakmaları</strong> sizi bekliyor!
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -182,18 +197,17 @@
                         <i class="fa-solid fa-play"></i>
                         <span>Hemen 25 Soruya Başla</span>
                     </button>
-                    <a href="#kulturelVitrin" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass turkuaz-border text-turkuaz-light font-semibold text-base hover:bg-turkuaz/10 transition flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-landmark text-turkuaz"></i>
-                        <span>Kültür Mirasını Gör</span>
-                    </a>
+                    <a href="index.html" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass turkuaz-border text-turkuaz-light font-semibold text-base hover:bg-turkuaz/10 transition flex items-center justify-center space-x-2">
+    <i class="fa-solid fa-campground text-turkuaz"></i>
+    <span>Ana Otağa Dön</span>
+</a>
                 </div>
             </section>
 
-            <!-- KÜLTÜREL VİTRİN: Dede Korkut (Yatay, Geniş ve Uzun Görünümlü Kart) -->
+            <!-- KÜLTÜREL VİTRİN: Dede Korkut -->
             <section id="kulturelVitrin" class="w-full max-w-4xl mb-14">
                 <div class="card-glass gold-border rounded-3xl overflow-hidden shadow-2xl hover:border-amberGold transition-all duration-300 group">
                     <div class="flex flex-col md:flex-row items-stretch">
-                        <!-- Yatay Görsel Alanı -->
                         <div class="md:w-1/2 h-64 sm:h-72 md:h-auto min-h-[260px] relative overflow-hidden">
                             <img src="dede korkut.jfif" alt="Dede Korkut" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700">
                             <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-bozkir-900/90 via-bozkir-900/30 to-transparent"></div>
@@ -201,7 +215,6 @@
                                 <i class="fa-solid fa-feather-pointed mr-1.5"></i> Bilgelik & Maarif
                             </span>
                         </div>
-                        <!-- Bilgi Alanı -->
                         <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center space-x-2 text-xs uppercase tracking-widest text-amberGold font-semibold mb-2">
@@ -238,7 +251,6 @@
                                     Kök Değer: Dayanışma
                                 </span>
                             </div>
-                            <!-- Günün Atasözü Görseli -->
                             <img src="Gemini_Generated_Image_3ufn9p3ufn9p3ufn.jfif" alt="Türk Atasözleri" class="w-full h-44 sm:h-52 object-cover rounded-xl mb-4 border border-amberGold/40 shadow-lg">
                             <blockquote id="homeQuoteText" class="text-xl sm:text-2xl font-serif font-semibold text-amberGold-light tracking-wide italic mb-2 transition-opacity duration-200">
                                 "Yalnız taş, duvar olmaz."
@@ -425,7 +437,7 @@
             <div class="space-y-3.5 text-slate-300 text-xs sm:text-sm leading-relaxed">
                 <p><strong>1.</strong> 150 atasözlük hazineden rastgele 25 soru gelir.</p>
                 <p><strong>2.</strong> Atasözündeki eksik kelimeyi 4 seçenek arasından doğru tahmin edin.</p>
-                <p><strong>3.</strong> Doğru yanıtlarda Dombra tınısı ve konfeti patlar, puanınız katlanır.</p>
+                <p><strong>3.</strong> Doğru yanıtlarda Dombra tınısı ve konfeti patlar, yanlış yanıtlarda şimşek çakar.</p>
                 <p><strong>4.</strong> Toplam 3 can hakkınız ve 3 farklı kültürel jokeriniz (%50, Dede Korkut Öğüdü, Harf İpucu) bulunur.</p>
             </div>
             <button onclick="closeModal('howToPlayModal')" class="mt-6 w-full py-3 rounded-xl bg-amberGold text-bozkir-950 font-bold hover:brightness-110 transition cursor-pointer">
@@ -436,15 +448,16 @@
 
     <!-- ALT BİLGİ -->
     <footer class="w-full card-glass border-t border-amberGold/20 py-4 text-center text-xs text-slate-400">
-        <p>Ataların Sözünde Maarifin İzinde &copy; 2026 — 150 Atasözü ve Kültürel Kök Değerler Bilgi Oyunu</p>
+        <p>Atasözleri ve Kültürel Değerler Bilgi Oyunu &copy; 2026 — 150 Atasözü ve Kültürel Kök Değerler</p>
     </footer>
 
     <!-- JAVASCRIPT KODLARI -->
     <script>
-        // HTML5 CANVAS KONFETİ MOTORU
+        // HTML5 CANVAS KONFETİ & ŞİMŞEK MOTORU
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
         let confettiParticles = [];
+        let lightnings = [];
         let animationFrameId = null;
 
         function resizeCanvas() {
@@ -471,33 +484,131 @@
                     opacity: 1
                 });
             }
-            if (!animationFrameId) renderConfetti();
+            if (!animationFrameId) renderFX();
         }
 
-        function renderConfetti() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = confettiParticles.length - 1; i >= 0; i--) {
-                const p = confettiParticles[i];
-                p.x += p.speedX;
-                p.y += p.speedY;
-                p.speedY += p.gravity;
-                p.rotation += p.rotationSpeed;
-                p.opacity -= 0.012;
+        // --- ŞİMŞEK OLUŞTURMA VE ÇATALLANMA ---
+        function generateLightningBolt(startX, startY, endX, endY, branchLevel = 0) {
+            const points = [{ x: startX, y: startY }];
+            let curX = startX;
+            let curY = startY;
+            const steps = Math.floor(Math.random() * 12 + 18);
+            const dy = (endY - startY) / steps;
 
-                if (p.opacity <= 0 || p.y > canvas.height) {
-                    confettiParticles.splice(i, 1);
-                    continue;
+            for (let i = 0; i < steps; i++) {
+                curY += dy;
+                curX += (Math.random() - 0.5) * 65;
+                points.push({ x: curX, y: curY });
+
+                if (branchLevel < 2 && Math.random() < 0.22) {
+                    const branchAngle = (Math.random() - 0.5) * 1.2;
+                    const branchLength = Math.random() * 90 + 50;
+                    lightnings.push({
+                        points: [
+                            { x: curX, y: curY },
+                            { x: curX + Math.sin(branchAngle) * branchLength, y: curY + Math.cos(branchAngle) * branchLength }
+                        ],
+                        alpha: 1,
+                        width: 1.5,
+                        decay: 0.08
+                    });
                 }
-                ctx.save();
-                ctx.translate(p.x, p.y);
-                ctx.rotate((p.rotation * Math.PI) / 180);
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = Math.max(0, p.opacity);
-                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
-                ctx.restore();
             }
+
+            lightnings.push({
+                points: points,
+                alpha: 1,
+                width: Math.random() * 2 + 2.5,
+                decay: 0.05
+            });
+        }
+
+        function triggerLightningFlash() {
+            const overlay = document.getElementById('lightningOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0.9';
+                setTimeout(() => {
+                    overlay.style.opacity = '0.2';
+                    setTimeout(() => {
+                        overlay.style.opacity = '0.85';
+                        setTimeout(() => {
+                            overlay.style.opacity = '0';
+                        }, 110);
+                    }, 70);
+                }, 80);
+            }
+
+            const count = Math.floor(Math.random() * 2) + 2;
+            for (let i = 0; i < count; i++) {
+                const sX = Math.random() * (canvas.width * 0.7) + (canvas.width * 0.15);
+                const eX = sX + (Math.random() - 0.5) * 220;
+                generateLightningBolt(sX, 0, eX, canvas.height * (0.65 + Math.random() * 0.35));
+            }
+
+            if (!animationFrameId) renderFX();
+        }
+
+        function renderFX() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let active = false;
+
+            // 1. Şimşek Çizimi
+            if (lightnings.length > 0) {
+                active = true;
+                for (let i = lightnings.length - 1; i >= 0; i--) {
+                    const bolt = lightnings[i];
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(bolt.points[0].x, bolt.points[0].y);
+                    for (let j = 1; j < bolt.points.length; j++) {
+                        ctx.lineTo(bolt.points[j].x, bolt.points[j].y);
+                    }
+                    ctx.strokeStyle = `rgba(147, 197, 253, ${bolt.alpha * 0.8})`;
+                    ctx.lineWidth = bolt.width + 4;
+                    ctx.lineCap = 'round';
+                    ctx.shadowColor = '#60a5fa';
+                    ctx.shadowBlur = 22;
+                    ctx.stroke();
+
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${bolt.alpha})`;
+                    ctx.lineWidth = bolt.width;
+                    ctx.stroke();
+                    ctx.restore();
+
+                    bolt.alpha -= bolt.decay;
+                    if (bolt.alpha <= 0) {
+                        lightnings.splice(i, 1);
+                    }
+                }
+            }
+
+            // 2. Konfeti Çizimi
             if (confettiParticles.length > 0) {
-                animationFrameId = requestAnimationFrame(renderConfetti);
+                active = true;
+                for (let i = confettiParticles.length - 1; i >= 0; i--) {
+                    const p = confettiParticles[i];
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    p.speedY += p.gravity;
+                    p.rotation += p.rotationSpeed;
+                    p.opacity -= 0.012;
+
+                    if (p.opacity <= 0 || p.y > canvas.height) {
+                        confettiParticles.splice(i, 1);
+                        continue;
+                    }
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = Math.max(0, p.opacity);
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+                    ctx.restore();
+                }
+            }
+
+            if (active) {
+                animationFrameId = requestAnimationFrame(renderFX);
             } else {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 cancelAnimationFrame(animationFrameId);
@@ -575,17 +686,44 @@
                     osc.start(now);
                     osc.stop(now + 0.35);
                 } else if (type === 'wrong') {
+                    // Yanlışta Şimşek / Gök Gürültüsü Sentezi
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(180, now);
-                    osc.frequency.exponentialRampToValueAtTime(95, now + 0.2);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
                     osc.start(now);
-                    osc.stop(now + 0.22);
+                    osc.stop(now + 0.5);
+
+                    try {
+                        const bufferSize = ctx.sampleRate * 0.7;
+                        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                        const data = buffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            data[i] = Math.random() * 2 - 1;
+                        }
+                        const noise = ctx.createBufferSource();
+                        noise.buffer = buffer;
+                        const filter = ctx.createBiquadFilter();
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(300, now);
+                        filter.frequency.linearRampToValueAtTime(70, now + 0.7);
+
+                        const noiseGain = ctx.createGain();
+                        noiseGain.gain.setValueAtTime(0.25, now);
+                        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+
+                        noise.connect(filter);
+                        filter.connect(noiseGain);
+                        noiseGain.connect(ctx.destination);
+                        noise.start(now + 0.03);
+                    } catch(err) {
+                        console.warn(err);
+                    }
                 } else if (type === 'click') {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -967,7 +1105,9 @@
 
                 showFeedbackModal(true, q, selectedWord);
             } else {
+                // YANLIŞ CEVAP: ŞİMŞEK ÇAKMASI VE GÖK GÜRÜLTÜSÜ
                 playCulturalSound('wrong');
+                triggerLightningFlash();
                 streak = 0;
                 wrongAnswersCount++;
                 lives--;
@@ -1015,8 +1155,8 @@
                 title.className = "text-2xl font-serif font-bold mb-1 text-emerald-400";
             } else {
                 icon.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 bg-rose-500/20 border border-rose-400/40 text-rose-400";
-                icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                title.innerText = "Yanlış Cevap!";
+                icon.innerHTML = '<i class="fa-solid fa-bolt text-yellow-300"></i>';
+                title.innerText = "Şimşek Çaktı! Yanlış Cevap";
                 title.className = "text-2xl font-serif font-bold mb-1 text-rose-400";
             }
 
@@ -1185,7 +1325,7 @@
                             ? '<span class="text-slate-500 font-semibold">Cevaplanamadı</span>' 
                             : wasCorrect 
                                 ? '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Doğru</span>' 
-                                : '<span class="text-rose-400 font-bold"><i class="fa-solid fa-xmark mr-1"></i>Yanlış (' + userResult.answered + ')</span>'
+                                : '<span class="text-rose-400 font-bold"><i class="fa-solid fa-bolt mr-1 text-yellow-400"></i>Yanlış (' + userResult.answered + ')</span>'
                         }
                     </div>
                     <div class="mb-2">

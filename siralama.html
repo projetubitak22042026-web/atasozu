@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cümleyi Doğru Sıralama Oyunu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amberGold: {
+                            DEFAULT: '#d4af37',
+                            light: '#fde68a',
+                            dark: '#9e7b16'
+                        },
+                        sariKoyusu: {
+                            950: '#1c1303',
+                            900: '#2b1d05',
+                            850: '#3d2b09',
+                            800: '#523a0c',
+                            700: '#735212'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sari-degrade-bg {
+            background-color: #f59e0b;
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.22) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #78350f 0%, #b45309 25%, #d97706 50%, #f59e0b 75%, #fbbf24 100%);
+            background-size: 38px 38px, 100% 100%;
+            background-attachment: fixed;
+        }
+
+        .gold-border {
+            border: 1px solid rgba(254, 240, 138, 0.55);
+            box-shadow: 0 0 24px rgba(217, 119, 6, 0.25);
+        }
+
+        .gold-text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #fef08a 40%, #fde047 70%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-glass {
+            background: rgba(43, 29, 5, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        #starCanvas {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        /* Şimşek Parlama Katmanı */
+        #lightningOverlay {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(191,219,254,0.5) 60%, rgba(30,58,138,0.35) 100%);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.06s ease-out;
+        }
+
+        .word-chip {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .word-chip:hover {
+            transform: translateY(-2px);
+        }
+        .word-chip:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake-box {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="sari-degrade-bg text-amber-50 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-300 selection:text-amber-950 relative overflow-x-hidden">
+
+    <!-- Uçuşan Altın Yıldızlar & Şimşek Tuvali -->
+    <canvas id="starCanvas"></canvas>
+
+    <!-- Şimşek Ekran Parlaması -->
+    <div id="lightningOverlay"></div>
+
+    <!-- ÜST BİLGİ & DURUM ÇUBUĞU -->
+    <header class="w-full card-glass border-b border-amber-300/30 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showHomeScreen()">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 p-0.5 shadow-lg shadow-amber-500/30 flex items-center justify-center">
+                    <div class="w-full h-full bg-sariKoyusu-950 rounded-full flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-feather-pointed text-base"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="font-serif font-bold text-xs sm:text-sm text-yellow-200 tracking-wide block">ATALARIN SÖZÜNDE MAARİFİN İZİNDE</span>
+                    <span class="text-[10px] text-amber-300 uppercase tracking-widest font-semibold block">4. Bölüm: Cümleyi Doğru Sıralama Oyunu</span>
+                </div>
+            </div>
+
+            <!-- Sağ Göstergeler -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- 3 Can Göstergesi -->
+                <div id="livesContainer" style="display: none;" class="items-center space-x-1 text-rose-500 text-sm sm:text-base" title="Kalan Can">
+                    <i class="fa-solid fa-heart heart-1 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-2 transition-transform"></i>
+                    <i class="fa-solid fa-heart heart-3 transition-transform"></i>
+                </div>
+
+                <!-- Soru Sayacı -->
+                <div id="questionBadge" style="display: none;" class="px-2.5 sm:px-3 py-1 rounded-xl bg-amber-500/25 border border-amber-400/40 text-yellow-200 font-bold text-xs sm:text-sm">
+                    <i class="fa-solid fa-list-ol mr-1"></i> <span id="currentQuestionNum">1</span> / 15
+                </div>
+
+                <!-- Puan -->
+                <div id="scoreContainer" style="display: none;" class="px-3 py-1 rounded-xl bg-amber-400/20 border border-amber-300/40 items-center space-x-1.5">
+                    <i class="fa-solid fa-award text-amber-300 text-xs sm:text-sm"></i>
+                    <span id="scoreText" class="font-bold text-yellow-100 text-xs sm:text-sm tracking-wider">0</span>
+                </div>
+
+                <!-- Ses Butonu -->
+                <button id="soundBtn" onclick="toggleSound()" class="p-2 sm:p-2.5 rounded-xl border border-amber-400/40 text-yellow-200 hover:bg-amber-400/20 transition cursor-pointer" title="Saz Sesi">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-xs sm:text-sm"></i>
+                </button>
+
+                <!-- Kurallar -->
+                <button onclick="openModal('howToPlayModal')" class="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-amber-400/40 text-yellow-200 hover:bg-amber-400/20 transition cursor-pointer">
+                    <i class="fa-regular fa-circle-question mr-1.5"></i> Kurallar
+                </button>
+            </div>
+        </div>
+
+        <!-- İlerleme Çubuğu -->
+        <div id="progressContainer" style="display: none;" class="w-full bg-sariKoyusu-950/90 h-1.5 sm:h-2 relative overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-amber-600 via-amber-400 to-yellow-200 transition-all duration-300 ease-out" style="width: 0%;"></div>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-center items-center">
+
+        <!-- ================= 1. GİRİŞ & TANITIM EKRANI ================= -->
+        <div id="homeSection" style="display: flex;" class="w-full flex-col items-center">
+            
+            <section class="text-center max-w-3xl mb-10">
+                <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-sariKoyusu-950/70 border border-amber-300/40 text-yellow-200 text-xs font-semibold uppercase tracking-wider mb-4 shadow">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                    <span>Karışık Kelimelerden Hikmetli Cümleye • 15 Soru</span>
+                </div>
+                
+                <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif font-black gold-text-gradient tracking-wide leading-tight mb-3 uppercase drop-shadow-md">
+                    Cümleyi Doğru Sıralama Oyunu
+                </h1>
+                <p class="text-base sm:text-xl text-yellow-100 font-medium mb-3">
+                    Karışık verilen kelimeleri doğru sıraya dizerek atasözünü tamamla!
+                </p>
+                <p class="text-sm sm:text-base text-amber-100 leading-relaxed font-normal mb-8 max-w-2xl mx-auto drop-shadow-sm">
+                    Kelimeler otağın meydanına karışık saçıldı. Kelimelere tıklayarak atasözünü eksiksiz ve doğru biçimde kur. Her doğru dizilimde <strong>saz tınıları</strong> eşliğinde göğe <strong>altın yıldızlar</strong> saçılsın, yanlış yaptığında ise <strong>şimşekler çaksın</strong>!
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button id="btnStartGameHome" onclick="restartWholeGame()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-sariKoyusu-950 font-bold text-lg shadow-xl shadow-amber-950/30 hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-3 cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Yeni 15 Atasözü Başlat</span>
+                    </button>
+                   
+<a href="index.html" class="w-full sm:w-auto px-7 py-4 rounded-xl card-glass border border-amber-300/40 text-yellow-200 font-semibold text-base hover:bg-amber-400/20 transition flex items-center justify-center space-x-2 cursor-pointer">
+    <i class="fa-solid fa-campground text-amber-300"></i>
+    <span>Ana Otağa Dön</span>
+</a>
+
+                </div>
+            </section>
+
+            <!-- KÜLTÜREL VİTRİN: MANAS DESTANI -->
+            <section id="kulturelVitrin" class="w-full max-w-4xl mb-12">
+                <div class="card-glass gold-border rounded-3xl overflow-hidden shadow-2xl hover:border-amber-300 transition-all duration-300 group">
+                    <div class="flex flex-col md:flex-row items-stretch">
+                        <div class="md:w-1/2 h-64 sm:h-72 md:h-auto min-h-[260px] relative overflow-hidden">
+                            <img src="manas.jfif" alt="Manas Destanı" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-sariKoyusu-950/90 via-sariKoyusu-950/30 to-transparent"></div>
+                            <span class="absolute top-4 left-4 px-3.5 py-1 rounded-full text-xs font-bold bg-amber-400 text-sariKoyusu-950 shadow-md">
+                                <i class="fa-solid fa-crown mr-1.5"></i> Birlik, Cesaret & Kahramanlık
+                            </span>
+                        </div>
+                        <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-2 text-xs uppercase tracking-widest text-amber-300 font-semibold mb-2">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <span>Bozkırın Asırlık Destanı</span>
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-3">Manas</h3>
+                                <p class="text-amber-100/90 text-sm sm:text-base leading-relaxed font-light mb-6">
+                                    Türk dünyasının yaşayan en ulu hafızası Manas Destanı; dağınık boyları bir araya getiren kutlu birliğin, vatan sevgisinin ve ataların sözündeki sarsılmaz doğruluğun sembolüdür[cite: 3, 4].
+                                </p>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-sariKoyusu-950/80 border border-amber-300/30 flex items-center space-x-3">
+                                <i class="fa-solid fa-quote-left text-amber-300 text-xl shrink-0 opacity-80"></i>
+                                <div class="text-xs sm:text-sm text-yellow-200 italic">
+                                    "Bölüneni kurt yer, birleşen dağları deler. Söz doğru, birlik kaim olmalıdır."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GÜNÜN ATASÖZÜ VE DEĞERİ KARTI -->
+            <section class="w-full max-w-3xl mb-12">
+                <div class="relative card-glass gold-border rounded-2xl p-6 sm:p-7">
+                    <div class="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 text-sariKoyusu-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-scroll"></i> Günün Atasözü & Hikmeti
+                    </div>
+                    
+                    <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex-1 pr-2 w-full">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span id="homeQuoteValue" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-yellow-200 border border-amber-300/40 font-semibold uppercase tracking-wide">
+                                    Kök Değer: Dayanışma
+                                </span>
+                            </div>
+                            <img src="Gemini_Generated_Image_3ufn9p3ufn9p3ufn.jfif" alt="Türk Atasözleri" class="w-full h-44 sm:h-52 object-cover rounded-xl mb-4 border border-amber-300/40 shadow-lg">
+                            <blockquote id="homeQuoteText" class="text-xl sm:text-2xl font-serif font-semibold text-yellow-200 tracking-wide italic mb-2 transition-opacity duration-200">
+                                "Yalnız taş, duvar olmaz."
+                            </blockquote>
+                            <p id="homeQuoteMeaning" class="text-amber-100/90 text-xs sm:text-sm leading-snug transition-opacity duration-200">
+                                İnsanlar tek başlarına büyük işleri başaramazlar; yardımlaşma ve dayanışma esastır[cite: 3].
+                            </p>
+                        </div>
+                        <button type="button" onclick="refreshHomeQuote()" class="self-end sm:self-center px-4 py-2.5 rounded-xl border border-amber-400/40 text-yellow-200 hover:bg-amber-400/20 active:scale-95 transition flex items-center gap-2 text-xs font-semibold cursor-pointer shrink-0 z-10" title="Yeni Söz Getir">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                            <span>Yenile</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= 2. AKTİF OYUN EKRANI ================= -->
+        <div id="gameSection" style="display: none;" class="w-full max-w-3xl flex-col space-y-5">
+            
+            <!-- Başlık ve Değer Rozeti -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span id="badgeQuestionIndex" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500/25 text-yellow-200 border border-amber-400/40">
+                        Atasözü 1 / 15
+                    </span>
+                    <span id="badgeValue" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-yellow-100 border border-amber-300/40">
+                        <i class="fa-solid fa-compass mr-1.5 text-amber-300"></i> <span id="valueText">Değer</span>
+                    </span>
+                </div>
+
+                <!-- Seri Rozeti -->
+                <div id="comboBadge" style="display: none;" class="items-center space-x-1.5 px-3 py-1 rounded-full bg-sariKoyusu-950/80 border border-amber-400/50 text-yellow-200 text-xs font-bold">
+                    <i class="fa-solid fa-fire text-amber-400"></i>
+                    <span id="comboText">2x Seri</span>
+                </div>
+            </div>
+
+            <!-- JOKER BUTONLARI -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full">
+                <button id="jokerFirstWord" onclick="useFirstWordJoker()" class="py-2.5 px-2 rounded-xl card-glass border border-amber-300/40 text-yellow-200 text-xs font-bold hover:bg-amber-400/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                    <span>İlk Kelimeyi Koy</span>
+                </button>
+                <button id="jokerClue" onclick="useClueJoker()" class="py-2.5 px-2 rounded-xl card-glass border border-amber-300/40 text-yellow-200 text-xs font-bold hover:bg-amber-400/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-feather-pointed text-amber-300"></i>
+                    <span>Dede Korkut İpucu</span>
+                </button>
+                <button id="jokerPass" onclick="usePassJoker()" class="py-2.5 px-2 rounded-xl card-glass border border-amber-300/40 text-yellow-200 text-xs font-bold hover:bg-amber-400/20 active:scale-95 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-forward-step text-amber-300"></i>
+                    <span>Soruyu Değiştir</span>
+                </button>
+            </div>
+
+            <!-- İpucu Bildirimi -->
+            <div id="clueBox" style="display: none;" class="p-3 rounded-2xl bg-sariKoyusu-950/90 border border-amber-300/40 text-xs sm:text-sm text-yellow-200 flex items-center justify-between">
+                <div>
+                    <i class="fa-solid fa-lightbulb text-amber-400 mr-2"></i>
+                    <span id="clueBoxText"></span>
+                </div>
+                <button onclick="document.getElementById('clueBox').style.display='none'" class="text-amber-200 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- OLUŞTURULAN CÜMLE ALANI -->
+            <div class="card-glass gold-border rounded-3xl p-5 sm:p-7 relative overflow-hidden">
+                <div class="flex items-center justify-between border-b border-amber-400/25 pb-3 mb-4">
+                    <span class="text-xs uppercase tracking-widest text-amber-300 font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-nib"></i> Cümleniz:
+                    </span>
+                    <button onclick="resetAnswerArea()" class="text-xs text-amber-200 hover:text-yellow-300 flex items-center gap-1 cursor-pointer transition">
+                        <i class="fa-solid fa-rotate-left"></i> Sıfırla
+                    </button>
+                </div>
+
+                <div id="targetSentenceArea" class="min-h-[75px] sm:min-h-[85px] p-3 rounded-2xl bg-sariKoyusu-950/80 border-2 border-dashed border-amber-400/50 flex flex-wrap items-center gap-2 transition-all">
+                    <!-- Kelimeler buraya gelecek -->
+                </div>
+
+                <div class="text-[11px] text-amber-200/70 mt-2 text-right">
+                    * Çıkarmak istediğiniz kelimenin üzerine tıklayabilirsiniz.
+                </div>
+            </div>
+
+            <!-- KARIŞIK KELİME HAVUZU -->
+            <div class="card-glass border border-amber-300/40 rounded-3xl p-5 sm:p-7 text-center">
+                <div class="text-xs uppercase tracking-widest text-yellow-200 font-bold mb-4 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cubes-stacked text-amber-400"></i> Karışık Kelimeler
+                </div>
+
+                <div id="sourceWordsArea" class="flex flex-wrap justify-center items-center gap-2.5 sm:gap-3 min-h-[60px]">
+                    <!-- Karışık kelimeler -->
+                </div>
+            </div>
+
+            <!-- KONTROL ET BUTONU -->
+            <div class="flex gap-3 pt-2">
+                <button id="btnCheckAnswer" onclick="checkCurrentAnswer()" class="flex-1 py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-sariKoyusu-950 font-bold text-base sm:text-lg shadow-xl shadow-amber-950/30 hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-check-double"></i>
+                    <span>Cümleyi Doğrula</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- ================= 3. OYUN SONU KARNE EKRANI ================= -->
+        <div id="endSection" style="display: none;" class="w-full max-w-3xl card-glass gold-border rounded-3xl p-6 sm:p-10 flex-col items-center">
+            <div id="endRankIcon" class="w-20 h-20 rounded-2xl bg-amber-400/20 border border-amber-300/40 text-amber-300 flex items-center justify-center text-4xl mb-4 shadow-xl">
+                <i class="fa-solid fa-award"></i>
+            </div>
+
+            <span id="resultRankBadge" class="px-4 py-1.5 rounded-full bg-amber-400/20 border border-amber-300/40 text-yellow-200 text-xs font-bold uppercase tracking-wider mb-3">
+                Söz Üstadı
+            </span>
+
+            <h2 id="endTitle" class="text-2xl sm:text-4xl font-serif font-bold text-white mb-2 text-center">
+                15 Atasözü Tamamlandı!
+            </h2>
+            <p id="resultComment" class="text-amber-100 text-sm text-center max-w-md mb-8">
+                Tebrikler! Karışık verilen kelimeleri doğru sıraya dizip atasözlerimizi tamamladınız.
+            </p>
+
+            <!-- Skor Kartları -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mb-8 text-center">
+                <div class="p-4 rounded-2xl bg-sariKoyusu-950/80 border border-amber-300/30">
+                    <span class="text-xs text-amber-200/80 block mb-1">Toplam Puan</span>
+                    <span id="finalScore" class="text-2xl font-bold font-serif text-yellow-200">0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-sariKoyusu-950/80 border border-emerald-500/30">
+                    <span class="text-xs text-amber-200/80 block mb-1">Tamamlanan</span>
+                    <span id="finalCompletedCount" class="text-2xl font-bold font-serif text-emerald-400">0 / 15</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-sariKoyusu-950/80 border border-rose-500/30">
+                    <span class="text-xs text-amber-200/80 block mb-1">Hatalı Deneme</span>
+                    <span id="finalErrors" class="text-2xl font-bold font-serif text-rose-400">0</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-sariKoyusu-950/80 border border-amber-300/30">
+                    <span class="text-xs text-amber-200/80 block mb-1">Kalan Can</span>
+                    <span id="finalLives" class="text-2xl font-bold font-serif text-white">0</span>
+                </div>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-8">
+                <button type="button" id="btnRestartGame" onclick="restartWholeGame()" class="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-sariKoyusu-950 font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer shadow-lg">
+                    <i class="fa-solid fa-shuffle"></i>
+                    <span>Yeni 15 Atasözü Başlat</span>
+                </button>
+                <button type="button" onclick="showHomeScreen()" class="flex-1 py-3.5 px-6 rounded-xl border border-amber-300/40 text-yellow-200 hover:bg-amber-400/20 font-semibold transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Manas'a Dön</span>
+                </button>
+            </div>
+
+            <!-- Çözülen Atasözlerinin Listesi -->
+            <div class="w-full border-t border-amber-400/25 pt-6">
+                <h4 class="text-base font-serif font-bold text-yellow-200 mb-4 text-center">
+                    <i class="fa-solid fa-list-check mr-2"></i> Çözdüğünüz Atasözleri & Değerleri
+                </h4>
+                <div id="reviewList" class="space-y-3.5 max-h-96 overflow-y-auto pr-1">
+                    <!-- Dinamik doldurulur -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- GERİ BİLDİRİM VE TEBRİK MODALI -->
+    <div id="feedbackModal" style="display: none;" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+        <div class="card-glass gold-border rounded-3xl max-w-lg w-full p-6 sm:p-8 text-center shadow-2xl relative">
+            <div id="feedbackIcon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 bg-amber-400/20 border border-amber-300/40 text-amber-300">
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <h3 id="feedbackTitle" class="text-2xl font-serif font-bold mb-2 text-yellow-200">Kutlu Olsun! Doğru Cümle</h3>
+            
+            <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/25 border border-amber-300/40 text-yellow-200 text-xs sm:text-sm font-bold shadow mb-4">
+                <i class="fa-solid fa-heart text-amber-400"></i>
+                <span>Kök Değer:</span>
+                <span id="feedbackValue" class="text-white font-extrabold uppercase tracking-wide"></span>
+            </div>
+
+            <p id="feedbackQuote" class="text-lg font-serif text-white font-bold mb-6 px-2"></p>
+
+            <button id="nextQuestionBtn" onclick="nextQuestion()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-sariKoyusu-950 font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center space-x-2 cursor-pointer">
+                <span>Sonraki Atasözüne Geç</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- NASIL OYNANIR MODALI -->
+    <div id="howToPlayModal" style="display: none;" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+        <div class="card-glass gold-border rounded-3xl max-w-md w-full p-6 text-left shadow-2xl relative">
+            <button onclick="closeModal('howToPlayModal')" class="absolute top-4 right-4 text-amber-200 hover:text-white text-xl cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-300 text-lg">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3 class="text-xl font-serif font-bold text-yellow-200">Oyun Kuralları</h3>
+            </div>
+            <div class="space-y-3.5 text-amber-100 text-xs sm:text-sm leading-relaxed">
+                <p><strong>1. Karışık Kelimeler:</strong> Her soruda atasözünün kelimeleri karışık sırayla verilir.</p>
+                <p><strong>2. Cümleyi Kurun:</strong> Kelimelere sırasıyla tıklayarak üstteki kutuda anlamlı ve doğru atasözünü oluşturun.</p>
+                <p><strong>3. Kelimeyi Geri Alma:</strong> Yanlış koyduğunuz bir kelimenin üzerine üst kutuda tıklarsanız tekrar aşağıya döner.</p>
+                <p><strong>4. Yıldızlar & Şimşekler:</strong> Doğru sıralamada saz tınıları eşliğinde altın yıldızlar saçılır, yanlış yapıldığında ise şimşekler çakar!</p>
+                <p><strong>5. Can & Joker:</strong> Toplam 3 can hakkınız ve 3 kültürel jokeriniz vardır. 15 atasözünü başarıyla tamamlayın!</p>
+            </div>
+            <button onclick="closeModal('howToPlayModal')" class="mt-6 w-full py-3 rounded-xl bg-amber-400 text-sariKoyusu-950 font-bold hover:brightness-110 transition cursor-pointer">
+                Anladım, Başlayalım
+            </button>
+        </div>
+    </div>
+
+    <!-- ALT BİLGİ -->
+    <footer class="w-full card-glass border-t border-amber-300/20 py-4 text-center text-xs text-amber-200/70">
+        <p>Ataların Sözünde Maarifin İzinde &copy; 2026 — 4. Bölüm: Cümleyi Doğru Sıralama Oyunu</p>
+    </footer>
+
+    <!-- JAVASCRIPT: YILDIZLAR, ŞİMŞEK MOTORU, SESLER VE OYUN MANTIĞI -->
+    <script>
+        // ================= 1. ALTIN YILDIZLAR & ŞİMŞEK TUVAL MOTORU =================
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let lightnings = [];
+        let starAnimId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawStar(cx, cy, spikes, outerRadius, innerRadius, color, alpha, rot) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rot);
+            ctx.globalAlpha = Math.max(0, alpha);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            let step = Math.PI / spikes;
+            for (let i = 0; i < 2 * spikes; i++) {
+                let r = (i % 2 === 0) ? outerRadius : innerRadius;
+                let x = Math.cos(i * step) * r;
+                let y = Math.sin(i * step) * r;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function scatterStars() {
+            const colors = ['#fde68a', '#fbbf24', '#f59e0b', '#d4af37', '#ffffff', '#fed7aa'];
+            for (let i = 0; i < 50; i++) {
+                stars.push({
+                    x: canvas.width / 2 + (Math.random() * 240 - 120),
+                    y: canvas.height * 0.45 + (Math.random() * 90 - 45),
+                    outerR: Math.random() * 12 + 8,
+                    innerR: Math.random() * 5 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedX: (Math.random() - 0.5) * 14,
+                    speedY: Math.random() * -12 - 5,
+                    gravity: 0.28,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.2,
+                    opacity: 1
+                });
+            }
+            if (!starAnimId) renderFX();
+        }
+
+        // --- ŞİMŞEK ÇATALLANMA VE ÇİZİMİ ---
+        function generateLightningBolt(startX, startY, endX, endY, branchLevel = 0) {
+            const points = [{ x: startX, y: startY }];
+            let curX = startX;
+            let curY = startY;
+            const steps = Math.floor(Math.random() * 12 + 18);
+            const dy = (endY - startY) / steps;
+
+            for (let i = 0; i < steps; i++) {
+                curY += dy;
+                curX += (Math.random() - 0.5) * 65;
+                points.push({ x: curX, y: curY });
+
+                if (branchLevel < 2 && Math.random() < 0.22) {
+                    const branchAngle = (Math.random() - 0.5) * 1.2;
+                    const branchLength = Math.random() * 90 + 50;
+                    lightnings.push({
+                        points: [
+                            { x: curX, y: curY },
+                            { x: curX + Math.sin(branchAngle) * branchLength, y: curY + Math.cos(branchAngle) * branchLength }
+                        ],
+                        alpha: 1,
+                        width: 1.5,
+                        decay: 0.08
+                    });
+                }
+            }
+
+            lightnings.push({
+                points: points,
+                alpha: 1,
+                width: Math.random() * 2 + 2.5,
+                decay: 0.05
+            });
+        }
+
+        function triggerLightningFlash() {
+            const overlay = document.getElementById('lightningOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0.9';
+                setTimeout(() => {
+                    overlay.style.opacity = '0.2';
+                    setTimeout(() => {
+                        overlay.style.opacity = '0.85';
+                        setTimeout(() => {
+                            overlay.style.opacity = '0';
+                        }, 110);
+                    }, 70);
+                }, 80);
+            }
+
+            const count = Math.floor(Math.random() * 2) + 2;
+            for (let i = 0; i < count; i++) {
+                const sX = Math.random() * (canvas.width * 0.7) + (canvas.width * 0.15);
+                const eX = sX + (Math.random() - 0.5) * 220;
+                generateLightningBolt(sX, 0, eX, canvas.height * (0.65 + Math.random() * 0.35));
+            }
+
+            if (!starAnimId) renderFX();
+        }
+
+        function renderFX() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let active = false;
+
+            // 1. Şimşekler
+            if (lightnings.length > 0) {
+                active = true;
+                for (let i = lightnings.length - 1; i >= 0; i--) {
+                    const bolt = lightnings[i];
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(bolt.points[0].x, bolt.points[0].y);
+                    for (let j = 1; j < bolt.points.length; j++) {
+                        ctx.lineTo(bolt.points[j].x, bolt.points[j].y);
+                    }
+                    ctx.strokeStyle = `rgba(147, 197, 253, ${bolt.alpha * 0.8})`;
+                    ctx.lineWidth = bolt.width + 4;
+                    ctx.lineCap = 'round';
+                    ctx.shadowColor = '#60a5fa';
+                    ctx.shadowBlur = 22;
+                    ctx.stroke();
+
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${bolt.alpha})`;
+                    ctx.lineWidth = bolt.width;
+                    ctx.stroke();
+                    ctx.restore();
+
+                    bolt.alpha -= bolt.decay;
+                    if (bolt.alpha <= 0) {
+                        lightnings.splice(i, 1);
+                    }
+                }
+            }
+
+            // 2. Yıldızlar
+            if (stars.length > 0) {
+                active = true;
+                for (let i = stars.length - 1; i >= 0; i--) {
+                    const s = stars[i];
+                    s.x += s.speedX;
+                    s.y += s.speedY;
+                    s.speedY += s.gravity;
+                    s.rotation += s.rotSpeed;
+                    s.opacity -= 0.016;
+
+                    if (s.opacity <= 0 || s.y > canvas.height) {
+                        stars.splice(i, 1);
+                        continue;
+                    }
+                    drawStar(s.x, s.y, 5, s.outerR, s.innerR, s.color, s.opacity, s.rotation);
+                }
+            }
+
+            if (active) {
+                starAnimId = requestAnimationFrame(renderFX);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cancelAnimationFrame(starAnimId);
+                starAnimId = null;
+            }
+        }
+
+        // ================= 2. SES MOTORU =================
+        let audioCtx = null;
+        let soundMuted = false;
+
+        function getAudioContext() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            } catch (e) {
+                console.warn(e);
+            }
+            return audioCtx;
+        }
+
+        function playCustomSound(type) {
+            if (soundMuted) return;
+            try {
+                const ctxAudio = getAudioContext();
+                if (!ctxAudio) return;
+                const now = ctxAudio.currentTime;
+
+                if (type === 'correct') {
+                    const freqs = [293.66, 392.00, 440.00, 587.33];
+                    freqs.forEach((f, idx) => {
+                        const osc = ctxAudio.createOscillator();
+                        const gain = ctxAudio.createGain();
+                        osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+                        osc.frequency.setValueAtTime(f, now + (idx * 0.045));
+                        gain.gain.setValueAtTime(0, now + (idx * 0.045));
+                        gain.gain.linearRampToValueAtTime(0.2, now + (idx * 0.045) + 0.015);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.045) + 0.38);
+                        osc.connect(gain);
+                        gain.connect(ctxAudio.destination);
+                        osc.start(now + (idx * 0.045));
+                        osc.stop(now + (idx * 0.045) + 0.38);
+                    });
+                } else if (type === 'wrong') {
+                    // Şimşek & Gök Gürültüsü Tınısı
+                    const osc = ctxAudio.createOscillator();
+                    const gain = ctxAudio.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.connect(gain);
+                    gain.connect(ctxAudio.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+
+                    try {
+                        const bufferSize = ctxAudio.sampleRate * 0.7;
+                        const buffer = ctxAudio.createBuffer(1, bufferSize, ctxAudio.sampleRate);
+                        const data = buffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            data[i] = Math.random() * 2 - 1;
+                        }
+                        const noise = ctxAudio.createBufferSource();
+                        noise.buffer = buffer;
+                        const filter = ctxAudio.createBiquadFilter();
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(300, now);
+                        filter.frequency.linearRampToValueAtTime(70, now + 0.7);
+
+                        const noiseGain = ctxAudio.createGain();
+                        noiseGain.gain.setValueAtTime(0.25, now);
+                        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+
+                        noise.connect(filter);
+                        filter.connect(noiseGain);
+                        noiseGain.connect(ctxAudio.destination);
+                        noise.start(now + 0.03);
+                    } catch(err) {
+                        console.warn(err);
+                    }
+                } else if (type === 'joker') {
+                    const osc = ctxAudio.createOscillator();
+                    const gain = ctxAudio.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(392, now);
+                    osc.frequency.linearRampToValueAtTime(659.25, now + 0.25);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctxAudio.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'click') {
+                    const osc = ctxAudio.createOscillator();
+                    const gain = ctxAudio.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain);
+                    gain.connect(ctxAudio.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function toggleSound() {
+            soundMuted = !soundMuted;
+            const icon = document.getElementById('soundIcon');
+            if (soundMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-amber-200/50';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-yellow-200';
+                playCustomSound('click');
+            }
+        }
+
+        // ================= 3. ATASÖZLERİ HAVUZU =================
+        const fullProverbsPool = [
+            {"cumle": "Yalnız taş, duvar olmaz", "deger": "Dayanışma"},
+            {"cumle": "Ağaç yaprağıyla gürler", "deger": "Dayanışma"},
+            {"cumle": "El eli yıkar, iki el yüzü yıkar", "deger": "Dayanışma"},
+            {"cumle": "Tek kanatla kuş uçmaz", "deger": "Dayanışma"},
+            {"cumle": "Dağ dağa kavuşmaz, insan insana kavuşur", "deger": "Dayanışma"},
+            {"cumle": "Düğün el ile harman yel ile olur", "deger": "Dayanışma"},
+            {"cumle": "Sütten ağzı yanan, yoğurdu üfleyerek yer", "deger": "Halden Anlamak"},
+            {"cumle": "Hamama giren terler", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Taşıma su ile değirmen dönmez", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Bakarsan bağ, bakmazsan dağ olur", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Her horoz kendi çöplüğünde öter", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Demir tavında dövülür", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Söz ağızdan çıkar", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Damlaya damlaya göl olur", "deger": "Sabır ve Emek"},
+            {"cumle": "Yuvarlanan taş yosun tutmaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Arı bal alacak çiçeği bilir", "deger": "Sabır ve Emek"},
+            {"cumle": "Başlamak bitirmenin yarısıdır", "deger": "Sabır ve Emek"},
+            {"cumle": "Dağ ne kadar yüce olsa da üstünden yol aşar", "deger": "Sabır ve Emek"},
+            {"cumle": "Yalancının mumu yatsıya kadar yanar", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Doğru söyleyeni dokuz köyden kovarlar", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Güneş balçıkla sıvanmaz", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Yalancının ipiyle kuyuya inilmez", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Minareyi çalan kılıfını hazırlar", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Ayağını yorganına göre uzat", "deger": "Ölçülülük ve Denge"},
+            {"cumle": "Bir elin nesi var, iki elin sesi var", "deger": "Dayanışma"},
+            {"cumle": "Sürüden ayrılanı kurt kapar", "deger": "Dayanışma"},
+            {"cumle": "Sağ elin verdiğini, sol el görmesin", "deger": "Dayanışma"},
+            {"cumle": "Veren el, alan elden üstündür", "deger": "Dayanışma"},
+            {"cumle": "Yarım elma, gönül alma", "deger": "Dayanışma"},
+            {"cumle": "İğneyi kendine, çuvaldızı başkasına batır", "deger": "Empati"},
+            {"cumle": "Davulun sesi uzaktan hoş gelir", "deger": "Empati"},
+            {"cumle": "Herkesin tenceresi kapalı kaynar", "deger": "Empati"},
+            {"cumle": "Her koyun kendi bacağından asılır", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Aslan yattığı yerden belli olur", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Doğru duvar yıkılmaz", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Eğri ağacın doğru gölgesi olmaz", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Yanlış hesap Bağdat'tan döner", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "İki dinle, bir söyle", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Ateş olmayan yerden duman çıkmaz", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Gülme komşuna, gelir başına", "deger": "Empati"},
+            {"cumle": "Tok açın halinden anlamaz", "deger": "Empati"},
+            {"cumle": "Biri yer biri bakar, kıyamet ondan kopar", "deger": "Empati"},
+            {"cumle": "Rüzgâr eken fırtına biçer", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Kendi düşen ağlamaz", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Ek tohumun hasını, çekme yiyecek yasını", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Emanete hıyanet olmaz", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Birlikten kuvvet doğar", "deger": "Dayanışma"},
+            {"cumle": "Komşu komşunun külüne muhtaçtır", "deger": "Dayanışma"},
+            {"cumle": "Baş başa vermeyince taş yerinden kalkmaz", "deger": "Dayanışma"},
+            {"cumle": "Damdan düşen, damdan düşenin halini anlar", "deger": "Empati"},
+            {"cumle": "El elin eşeğini türkü çağırarak arar", "deger": "Empati"},
+            {"cumle": "Ne doğrarsan aşına, o çıkar kaşığına", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Akıl yaşta değil, baştadır", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Sakla samanı, gelir zamanı", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Doğru söz yemin istemez", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Altın çamura düşmekle değerini kaybetmez", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Dost kara günde belli olur", "deger": "Dayanışma"},
+            {"cumle": "Kardeş kardeşi atmış, yâr başında tutmuş", "deger": "Dayanışma"},
+            {"cumle": "Az veren candan, çok veren maldan", "deger": "Dayanışma"},
+            {"cumle": "İyilik eden iyilik bulur", "deger": "Dayanışma"},
+            {"cumle": "İyilik yap denize at, balık bilmezse Halik bilir", "deger": "Dayanışma"},
+            {"cumle": "Ne verirsen elinle, o gider seninle", "deger": "Dayanışma"},
+            {"cumle": "Dost dostun eyerlenmiş atıdır", "deger": "Dayanışma"},
+            {"cumle": "Misafir kısmetiyle gelir", "deger": "Dayanışma"},
+            {"cumle": "El el ile, değirmen yel ile", "deger": "Dayanışma"},
+            {"cumle": "Komşuda pişer, bize de düşer", "deger": "Dayanışma"},
+            {"cumle": "Kişi kendinden bilir işi", "deger": "Empati"},
+            {"cumle": "Hasta olmayan sağlığın kadrini bilmez", "deger": "Empati"},
+            {"cumle": "Canı yanan eşek, attan yüğrük olur", "deger": "Empati"},
+            {"cumle": "Tok ağırlaması güç olur", "deger": "Empati"},
+            {"cumle": "Ağaç yaşken eğilir", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Ne ekersen onu biçersin", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Başa gelen çekilir", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Zararın neresinden dönülse kârdır", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Su uyur, düşman uyumaz", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Borç yiğidin kamçısıdır", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "At binenin, kılıç kuşananındır", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Sabreden derviş muradına ermiş", "deger": "Sabır ve Emek"},
+            {"cumle": "Emek olmadan yemek olmaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Sabır acıdır, meyvesi tatlıdır", "deger": "Sabır ve Emek"},
+            {"cumle": "Zahmetsiz rahmet olmaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Tarlada izi olmayanın, harmanda yüzü olmaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Bağa bak üzüm olsun, yemeye yüzün olsun", "deger": "Sabır ve Emek"},
+            {"cumle": "Akarsu pislik tutmaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Sora sora Bağdat bulunur", "deger": "Sabır ve Emek"},
+            {"cumle": "Aza kanaat etmeyen, çoğu hiç bulamaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Hazıra dağlar dayanmaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Yazın terleyen, kışın üşümez", "deger": "Sabır ve Emek"},
+            {"cumle": "Mızrak çuvala sığmaz", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Bozacının şahidi şıracıdır", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Su bulanmayınca durulmaz", "deger": "Doğruluk ve Dürüstlük"},
+            {"cumle": "Nerde birlik, orada dirlik", "deger": "Dayanışma"},
+            {"cumle": "Ateş düştüğü yeri yakar", "deger": "Empati"},
+            {"cumle": "Aç ne yemez, tok ne demez", "deger": "Empati"},
+            {"cumle": "Ağlarsa anam ağlar, gerisi yalan ağlar", "deger": "Empati"},
+            {"cumle": "Yarası olan gocunur", "deger": "Empati"},
+            {"cumle": "Düşenin dostu olmaz", "deger": "Empati"},
+            {"cumle": "Derdini söylemeyen derman bulamaz", "deger": "Empati"},
+            {"cumle": "Hatasız kul olmaz", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Bugünkü işini yarına bırakma", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "Erken kalkan yol alır", "deger": "Sorumluluk Bilinci"},
+            {"cumle": "İşleyen demir paslanmaz", "deger": "Sabır ve Emek"},
+            {"cumle": "Yazın başı pişenin, kışın aşı pişer", "deger": "Sabır ve Emek"},
+            {"cumle": "Acele işe şeytan karışır", "deger": "Sabır ve Emek"},
+            {"cumle": "Geç olsun da güç olmasın", "deger": "Sabır ve Emek"},
+            {"cumle": "Tatlı dil yılanı deliğinden çıkarır", "deger": "Nezaket ve Hoşgörü"},
+            {"cumle": "Güneş girmeyen eve doktor girer", "deger": "Sağlık ve Temizlik"},
+            {"cumle": "Akıl akıldan üstündür", "deger": "İstişare ve Alçakgönüllülük"},
+            {"cumle": "Denize düşen yılana sarılır", "deger": "Tedbirlilik"},
+            {"cumle": "Üzüm üzüme baka baka kararır", "deger": "Arkadaş Seçimi"},
+            {"cumle": "Bülbülü altın kafese koymuşlar, yine de vatanım demiş", "deger": "Vatan Sevgisi"},
+            {"cumle": "Bin bilsen de bir bilene danış", "deger": "İstişare"}
+        ];
+
+        const proverbMeanings = {
+            "Yalnız taş, duvar olmaz": "İnsanlar tek başlarına büyük işleri başaramazlar; yardımlaşma ve dayanışma esastır.",
+            "Ağaç yaprağıyla gürler": "İnsan ailesi, dostları ve yakınlarıyla bir arada olunca güçlü ve huzurludur.",
+            "Birlikten kuvvet doğar": "Birlikte hareket eden topluluklar tüm zorlukları kolayca aşarlar.",
+            "Damlaya damlaya göl olur": "Küçük birikimler zamanla büyük bir değere dönüşür; tasarruf ve sabrı simgeler.",
+            "İşleyen demir paslanmaz": "Sürekli çalışan insan hem yeteneklerini geliştirir hem de dinç kalır."
+        };
+
+        let lastHomeQuoteIndex = -1;
+        function refreshHomeQuote() {
+            playCustomSound('click');
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * fullProverbsPool.length);
+            } while (nextIndex === lastHomeQuoteIndex && fullProverbsPool.length > 1);
+            
+            lastHomeQuoteIndex = nextIndex;
+            const item = fullProverbsPool[nextIndex];
+            
+            const textEl = document.getElementById('homeQuoteText');
+            const meanEl = document.getElementById('homeQuoteMeaning');
+            const valEl = document.getElementById('homeQuoteValue');
+
+            if (textEl && meanEl && valEl) {
+                textEl.style.opacity = '0';
+                meanEl.style.opacity = '0';
+                valEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    textEl.innerText = `"${item.cumle}."`;
+                    meanEl.innerText = proverbMeanings[item.cumle] || "Atalarımızın asırlardır nesilden nesle aktardığı hikmetli ve yol gösterici öğüt.";
+                    valEl.innerText = `Kök Değer: ${item.deger}`;
+                    textEl.style.opacity = '1';
+                    meanEl.style.opacity = '1';
+                    valEl.style.opacity = '1';
+                }, 180);
+            }
+        }
+
+        // ================= 4. OYUN YÖNETİMİ =================
+        const TOTAL_QUESTIONS = 15;
+        let currentGameList = [];
+        let currentIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let streak = 0;
+        let errorCount = 0;
+        let allCompletedLog = [];
+
+        let originalWords = [];
+        let currentTargetWords = [];
+        let currentAvailableWords = [];
+
+        let jokersUsed = {
+            firstWord: false,
+            clue: false,
+            pass: false
+        };
+
+        function getShuffled15Items() {
+            const copy = [...fullProverbsPool];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy.slice(0, TOTAL_QUESTIONS);
+        }
+
+        function restartWholeGame() {
+            playCustomSound('click');
+
+            const feedbackModal = document.getElementById('feedbackModal');
+            if (feedbackModal) {
+                feedbackModal.style.display = 'none';
+                feedbackModal.classList.add('opacity-0');
+            }
+            const howToPlay = document.getElementById('howToPlayModal');
+            if (howToPlay) {
+                howToPlay.style.display = 'none';
+                howToPlay.classList.add('opacity-0');
+            }
+
+            document.getElementById('homeSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'none';
+            document.getElementById('gameSection').style.display = 'flex';
+
+            document.getElementById('livesContainer').style.display = 'flex';
+            document.getElementById('questionBadge').style.display = 'flex';
+            document.getElementById('scoreContainer').style.display = 'flex';
+            document.getElementById('progressContainer').style.display = 'block';
+
+            currentGameList = getShuffled15Items();
+            currentIndex = 0;
+            score = 0;
+            lives = 3;
+            streak = 0;
+            errorCount = 0;
+            allCompletedLog = [];
+            jokersUsed = { firstWord: false, clue: false, pass: false };
+
+            updateLivesUI();
+            updateScoreUI();
+            resetJokerUI();
+            loadQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadQuestion() {
+            document.getElementById('clueBox').style.display = 'none';
+            const item = currentGameList[currentIndex];
+
+            document.getElementById('currentQuestionNum').innerText = currentIndex + 1;
+            document.getElementById('badgeQuestionIndex').innerText = `Atasözü ${currentIndex + 1} / ${TOTAL_QUESTIONS}`;
+            document.getElementById('valueText').innerText = item.deger;
+
+            const percent = (currentIndex / TOTAL_QUESTIONS) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+
+            const comboBadge = document.getElementById('comboBadge');
+            if (streak >= 2) {
+                comboBadge.style.display = 'inline-flex';
+                document.getElementById('comboText').innerText = `${streak}x Seri`;
+            } else {
+                comboBadge.style.display = 'none';
+            }
+
+            originalWords = item.cumle.trim().split(/\s+/);
+            
+            currentAvailableWords = originalWords.map((word, idx) => ({
+                id: idx,
+                text: word
+            }));
+
+            for (let i = currentAvailableWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentAvailableWords[i], currentAvailableWords[j]] = [currentAvailableWords[j], currentAvailableWords[i]];
+            }
+
+            currentTargetWords = [];
+            renderWords();
+        }
+
+        function renderWords() {
+            const sourceArea = document.getElementById('sourceWordsArea');
+            const targetArea = document.getElementById('targetSentenceArea');
+
+            sourceArea.innerHTML = '';
+            targetArea.innerHTML = '';
+
+            if (currentTargetWords.length === 0) {
+                targetArea.innerHTML = `<span class="text-amber-200/50 italic text-sm select-none mx-auto">Aşağıdaki kelimelere sırasıyla tıklayarak cümlenizi buraya diziniz...</span>`;
+            } else {
+                currentTargetWords.forEach(wordObj => {
+                    const chip = document.createElement('button');
+                    chip.type = "button";
+                    chip.className = "word-chip py-2 px-3.5 sm:px-4 rounded-xl bg-gradient-to-r from-amber-400/35 to-yellow-300/35 border border-yellow-300/70 text-yellow-200 font-bold text-sm sm:text-base flex items-center gap-1.5 shadow-md cursor-pointer";
+                    chip.innerHTML = `<span>${wordObj.text}</span> <i class="fa-solid fa-xmark text-[10px] text-amber-300"></i>`;
+                    chip.onclick = () => removeWordFromTarget(wordObj.id);
+                    targetArea.appendChild(chip);
+                });
+            }
+
+            currentAvailableWords.forEach(wordObj => {
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = "word-chip py-2.5 px-4 sm:px-5 rounded-2xl card-glass border border-amber-300/40 text-amber-100 font-serif font-bold text-sm sm:text-base hover:border-amber-300 hover:bg-sariKoyusu-800/80 active:scale-95 shadow transition cursor-pointer";
+                btn.innerText = wordObj.text;
+                btn.onclick = () => addWordToTarget(wordObj.id);
+                sourceArea.appendChild(btn);
+            });
+        }
+
+        function addWordToTarget(wordId) {
+            playCustomSound('click');
+            const index = currentAvailableWords.findIndex(w => w.id === wordId);
+            if (index !== -1) {
+                const [wordObj] = currentAvailableWords.splice(index, 1);
+                currentTargetWords.push(wordObj);
+                renderWords();
+            }
+        }
+
+        function removeWordFromTarget(wordId) {
+            playCustomSound('click');
+            const index = currentTargetWords.findIndex(w => w.id === wordId);
+            if (index !== -1) {
+                const [wordObj] = currentTargetWords.splice(index, 1);
+                currentAvailableWords.push(wordObj);
+                renderWords();
+            }
+        }
+
+        function resetAnswerArea() {
+            playCustomSound('click');
+            currentAvailableWords = [...currentAvailableWords, ...currentTargetWords];
+            currentTargetWords = [];
+            renderWords();
+        }
+
+        function checkCurrentAnswer() {
+            if (currentTargetWords.length === 0) return;
+
+            const targetArea = document.getElementById('targetSentenceArea');
+            const assembled = currentTargetWords.map(w => w.text).join(' ');
+            const expected = originalWords.join(' ');
+
+            if (assembled.trim() === expected.trim()) {
+                playCustomSound('correct');
+                scatterStars();
+
+                streak++;
+                const gained = 100 + (streak > 1 ? (streak - 1) * 25 : 0);
+                score += gained;
+                updateScoreUI();
+
+                const item = currentGameList[currentIndex];
+                allCompletedLog.push(item);
+
+                showFeedbackModal(item);
+            } else {
+                // YANLIŞ: ŞİMŞEK ÇAKMASI VE GÖK GÜRÜLTÜSÜ
+                playCustomSound('wrong');
+                triggerLightningFlash();
+
+                streak = 0;
+                errorCount++;
+                lives--;
+                updateLivesUI();
+
+                targetArea.classList.add('shake-box', 'border-rose-500');
+                setTimeout(() => {
+                    targetArea.classList.remove('shake-box', 'border-rose-500');
+                    if (lives <= 0) {
+                        endGame(true);
+                    }
+                }, 450);
+            }
+        }
+
+        function showFeedbackModal(item) {
+            const modal = document.getElementById('feedbackModal');
+            document.getElementById('feedbackValue').innerText = item.deger;
+            document.getElementById('feedbackQuote').innerText = `"${item.cumle}."`;
+
+            const nextBtn = document.getElementById('nextQuestionBtn');
+            if (currentIndex >= TOTAL_QUESTIONS - 1) {
+                nextBtn.innerHTML = `<span>15 Atasözünü Tamamla & Karneni Gör</span> <i class="fa-solid fa-award ml-1"></i>`;
+            } else {
+                nextBtn.innerHTML = `<span>Sonraki Atasözüne Geç (${currentIndex + 2} / ${TOTAL_QUESTIONS})</span> <i class="fa-solid fa-arrow-right ml-1"></i>`;
+            }
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function nextQuestion() {
+            playCustomSound('click');
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                if (currentIndex >= TOTAL_QUESTIONS - 1) {
+                    endGame(false);
+                } else {
+                    currentIndex++;
+                    loadQuestion();
+                }
+            }, 180);
+        }
+
+        function updateLivesUI() {
+            for (let i = 1; i <= 3; i++) {
+                const heart = document.querySelector(`.heart-${i}`);
+                if (heart) {
+                    if (i <= lives) {
+                        heart.className = `fa-solid fa-heart heart-${i} text-rose-500 scale-100 transition-all`;
+                    } else {
+                        heart.className = `fa-regular fa-heart heart-${i} text-amber-900/60 scale-90 transition-all`;
+                    }
+                }
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('scoreText').innerText = score;
+        }
+
+        // ================= JOKERLER =================
+        function resetJokerUI() {
+            ['jokerFirstWord', 'jokerClue', 'jokerPass'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            });
+        }
+
+        function useFirstWordJoker() {
+            if (jokersUsed.firstWord) return;
+            playCustomSound('joker');
+            jokersUsed.firstWord = true;
+
+            const firstWordText = originalWords[0];
+            const foundInAvail = currentAvailableWords.find(w => w.text === firstWordText);
+
+            if (foundInAvail) {
+                addWordToTarget(foundInAvail.id);
+            }
+
+            const btn = document.getElementById('jokerFirstWord');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        function useClueJoker() {
+            if (jokersUsed.clue) return;
+            playCustomSound('joker');
+            jokersUsed.clue = true;
+
+            const box = document.getElementById('clueBox');
+            const first = originalWords[0];
+            const last = originalWords[originalWords.length - 1];
+            document.getElementById('clueBoxText').innerText = `Dede Korkut Öğüdü: Bu hikmetli söz "${first}" kelimesiyle başlar ve "${last}" kelimesiyle biter.`;
+            box.style.display = 'flex';
+
+            const btn = document.getElementById('jokerClue');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        function usePassJoker() {
+            if (jokersUsed.pass) return;
+            playCustomSound('joker');
+            jokersUsed.pass = true;
+
+            const randomItem = fullProverbsPool[Math.floor(Math.random() * fullProverbsPool.length)];
+            currentGameList[currentIndex] = randomItem;
+            loadQuestion();
+
+            const btn = document.getElementById('jokerPass');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        // ================= 5. OYUN SONU KARNE =================
+        function endGame(isGameOver = false) {
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'flex';
+            document.getElementById('progressBar').style.width = '100%';
+
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('finalCompletedCount').innerText = `${allCompletedLog.length} / ${TOTAL_QUESTIONS}`;
+            document.getElementById('finalErrors').innerText = errorCount;
+            document.getElementById('finalLives').innerText = lives;
+
+            const rankBadge = document.getElementById('resultRankBadge');
+            const endTitle = document.getElementById('endTitle');
+            const comment = document.getElementById('resultComment');
+            const rankIcon = document.getElementById('endRankIcon');
+
+            if (isGameOver) {
+                playCustomSound('wrong');
+                rankIcon.innerHTML = '<i class="fa-solid fa-heart-crack text-rose-500"></i>';
+                rankBadge.innerText = "💔 Canlarınız Tükendi";
+                rankBadge.className = "px-4 py-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3";
+                endTitle.innerText = "Haklarınız Bitti!";
+                comment.innerText = `Oyun sona erdi ancak gayretiniz çok değerli! Toplam ${allCompletedLog.length} atasözünü başarıyla kurdunuz. Listeyi inceleyip tekrar deneyebilirsiniz.`;
+            } else {
+                scatterStars();
+                playCustomSound('correct');
+                rankIcon.innerHTML = '<i class="fa-solid fa-award text-amber-300"></i>';
+                endTitle.innerText = "15 Atasözü Başarıyla Kuruldu!";
+                if (errorCount === 0) {
+                    rankBadge.innerText = "🌟 Manas Bilgesi & Cümle Üstadı";
+                    comment.innerText = "Kutlu olsun! Hiç hata yapmadan 15 atasözünün tamamını eksiksiz sıraya dizdiniz.";
+                } else {
+                    rankBadge.innerText = "📜 Söz Muhafızı";
+                    comment.innerText = "Tebrikler! Atalarımızın söz dizimini ve hikmetli öğütlerini başarıyla kavradınız.";
+                }
+            }
+
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+
+            allCompletedLog.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-4 rounded-2xl bg-sariKoyusu-950/80 border border-amber-300/30 text-xs text-left";
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-serif font-bold text-yellow-200 text-sm">#${idx + 1}. "${item.cumle}."</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-500/20 text-yellow-200 text-[10px] font-bold">
+                            <i class="fa-solid fa-compass mr-1 text-[9px] text-amber-400"></i> ${item.deger}
+                        </span>
+                    </div>
+                `;
+                reviewList.appendChild(div);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showHomeScreen() {
+            playCustomSound('click');
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('endSection').style.display = 'none';
+            document.getElementById('homeSection').style.display = 'flex';
+
+            document.getElementById('livesContainer').style.display = 'none';
+            document.getElementById('questionBadge').style.display = 'none';
+            document.getElementById('scoreContainer').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openModal(id) {
+            playCustomSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.style.display = 'flex';
+                setTimeout(() => m.classList.remove('opacity-0'), 10);
+            }
+        }
+
+        function closeModal(id) {
+            playCustomSound('click');
+            const m = document.getElementById(id);
+            if (m) {
+                m.classList.add('opacity-0');
+                setTimeout(() => m.style.display = 'none', 200);
+            }
+        }
+    </script>
+</body>
+</html>

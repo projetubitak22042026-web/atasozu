@@ -76,12 +76,11 @@
         }
 
         .card-glass {
-            background: rgba(18, 29, 39, 0.82);
+            background: rgba(18, 29, 39, 0.85);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
         }
 
-        /* Kusursuz Dairesel Çerçeveler */
         .circle-badge {
             position: relative;
             border-radius: 9999px;
@@ -161,7 +160,7 @@
                 Atasözleri ve Kültürel Değerler Oyunu
             </p>
             <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light mb-8 max-w-2xl mx-auto">
-                Bozkırın derinliklerinden Dede Korkut'un hikmetine, otağların samimiyetinden at sırtındaki cesarete uzanan atasözlerimizi ve kök değerlerimizi oyunla keşfedin!
+                Bozkırın derinliklerinden Dede Korkut'un hikmetine, otağların samimiyetinden at sırtındaki cesarete uzanan atasözlerimizi ve kök değerlerimizi 6 farklı yarışma moduyla keşfedin!
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -293,89 +292,169 @@
             </div>
         </section>
 
-        <!-- Oyun Modları Seçimi -->
+        <!-- MAARİF YARIŞMA MODLARI (6 BÖLÜM) -->
         <section id="gameModes" class="w-full mb-16">
             <div class="text-center mb-10">
+                <div class="inline-flex items-center space-x-2 px-4 py-1 rounded-full bg-amberGold/20 border border-amberGold/40 text-amberGold-light text-xs font-semibold uppercase tracking-wider mb-3">
+                    <i class="fa-solid fa-shapes"></i>
+                    <span>Toplam 6 Farklı Oyun Formatı</span>
+                </div>
                 <h2 class="text-2xl sm:text-3xl font-serif font-bold text-amberGold-light tracking-wide mb-2">Maarif Yarışma Modları</h2>
                 <p class="text-slate-400 text-sm sm:text-base">Atalarımızın mirasını keşfedeceğin mücadeleyi belirle</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Mod 1 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- MOD 1: Atasözleri ve Kültürel Değerler Bilgi Oyunu -->
                 <div class="group relative card-glass gold-border rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-amberGold/15">
                     <div class="absolute top-4 right-4">
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Kolay / Klasik</span>
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">1. Bölüm</span>
                     </div>
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-amberGold/15 border border-amberGold/30 text-amberGold flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
                             <i class="fa-solid fa-puzzle-piece"></i>
                         </div>
-                        <h3 class="text-xl font-serif font-bold text-white mb-2">Eksik Kelimeyi Tamamla</h3>
-                        <p class="text-slate-300 text-sm leading-relaxed mb-6">
-                            Atasözünde eksik bırakılan hikmetli sözcüğü bul, atasözünü aslına uygun tamamla.
+                        <h3 class="text-lg font-serif font-bold text-white mb-2 leading-snug">Atasözleri ve Kültürel Değerler Bilgi Oyunu</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                            Atasözünde boş bırakılan hikmetli sözcüğü bul, atasözünü aslına uygun olarak eksiksiz tamamla.
                         </p>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
-                            <span><i class="fa-solid fa-layer-group text-amberGold mr-1.5"></i> 100+ Atasözü</span>
-                            <span><i class="fa-solid fa-star text-amberGold mr-1.5"></i> Temel Maarif</span>
+                            <span><i class="fa-solid fa-layer-group text-amberGold mr-1.5"></i> 25 Soru</span>
+                            <span><i class="fa-solid fa-feather text-amberGold mr-1.5"></i> Dede Korkut</span>
                         </div>
-                        <a href="eksik_kelime.html" target="_blank"
-   class="w-full py-3 rounded-xl bg-amberGold/20 hover:bg-amberGold text-amberGold-light hover:text-bozkir-950 font-bold text-sm border border-amberGold/40 transition block text-center">
-    Bu Modla Başla
-</a>
+                        <button onclick="startGameModal('Atasözleri ve Kültürel Değerler Bilgi Oyunu', 'eksik_kelime.html')" class="w-full py-3 rounded-xl bg-amberGold/20 hover:bg-amberGold text-amberGold-light hover:text-bozkir-950 font-bold text-sm border border-amberGold/40 transition">
+                            Bu Modla Başla
+                        </button>
                     </div>
                 </div>
 
-                <!-- Mod 2 -->
+                <!-- MOD 2: Olay ve Değer Eşleştirme Oyunu -->
                 <div class="group relative card-glass turkuaz-border rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-turkuaz/20">
                     <div class="absolute top-4 right-4">
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40">Kök Değer Odaklı</span>
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-turkuaz/20 text-turkuaz-light border border-turkuaz/40">2. Bölüm</span>
                     </div>
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-turkuaz/15 border border-turkuaz/30 text-turkuaz-light flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-heart"></i>
+                            <i class="fa-solid fa-book-open-reader"></i>
                         </div>
-                        <h3 class="text-xl font-serif font-bold text-white mb-2">Değerden Atasözüne</h3>
-                        <p class="text-slate-300 text-sm leading-relaxed mb-6">
-                            Vatanseverlik, adalet, vefa ve dürüstlük gibi erdemlerin işlendiği doğru atasözünü eşleştir.
+                        <h3 class="text-lg font-serif font-bold text-white mb-2 leading-snug">Olay ve Değer Eşleştirme Oyunu</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                            Hayattan kesitler içeren olay ve senaryoları incele, ana fikri en doğru anlatan atasözünü ve değeri eşleştir.
                         </p>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
-                            <span><i class="fa-solid fa-compass text-turkuaz-light mr-1.5"></i> Kök Değerler</span>
-                            <span><i class="fa-solid fa-bolt text-turkuaz-light mr-1.5"></i> 2x Puan</span>
+                            <span><i class="fa-solid fa-compass text-turkuaz-light mr-1.5"></i> 10 Senaryo</span>
+                            <span><i class="fa-solid fa-campground text-turkuaz-light mr-1.5"></i> Otağ Ruhu</span>
                         </div>
-                        <button onclick="startGameModal('Değerden Atasözüne')" class="w-full py-3 rounded-xl bg-turkuaz hover:bg-turkuaz-light text-bozkir-950 font-bold text-sm transition">
+                        <button onclick="startGameModal('Olay ve Değer Eşleştirme Oyunu', 'yedek_kelime.html')" class="w-full py-3 rounded-xl bg-turkuaz hover:bg-turkuaz-light text-bozkir-950 font-bold text-sm transition">
                             Bu Modla Başla
                         </button>
                     </div>
                 </div>
 
-                <!-- Mod 3 -->
-                <div class="group relative card-glass border border-otagKizil/50 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-otagKizil/20">
+                <!-- MOD 3: Atasözleri ve Anlam Eşleştirmesi Oyunu -->
+                <div class="group relative card-glass border border-amber-600/50 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-amber-600/20">
                     <div class="absolute top-4 right-4">
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">Hızlı & Heyecanlı</span>
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">3. Bölüm</span>
                     </div>
                     <div>
-                        <div class="w-14 h-14 rounded-2xl bg-otagKizil/20 border border-otagKizil/40 text-otagKizil-light flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-stopwatch-20"></i>
+                        <div class="w-14 h-14 rounded-2xl bg-amber-600/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-table-columns"></i>
                         </div>
-                        <h3 class="text-xl font-serif font-bold text-white mb-2">Zamana Karşı Bilgelik</h3>
-                        <p class="text-slate-300 text-sm leading-relaxed mb-6">
-                            60 saniye boyunca art arda gelen atasözlerini hatasız çöz, seri puanları ve maarif unvanını kap!
+                        <h3 class="text-lg font-serif font-bold text-white mb-2 leading-snug">Atasözleri ve Anlam Eşleştirmesi Oyunu</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                            Soldaki atasözlerini sağdaki karışık anlamlarla doğru eşleştir; saz sesleri eşliğinde sevgi kalpleri saçılsın.
                         </p>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
-                            <span><i class="fa-solid fa-clock text-otagKizil-light mr-1.5"></i> 60 Saniye</span>
-                            <span><i class="fa-solid fa-fire text-otagKizil-light mr-1.5"></i> Kombo Çarpanı</span>
+                            <span><i class="fa-solid fa-layer-group text-amber-300 mr-1.5"></i> 3 Aşama (15 Söz)</span>
+                            <span><i class="fa-solid fa-horse text-amber-300 mr-1.5"></i> Bozkır Atı</span>
                         </div>
-                        <button onclick="startGameModal('Zamana Karşı Bilgelik')" class="w-full py-3 rounded-xl bg-otagKizil/30 hover:bg-otagKizil text-white font-bold text-sm border border-otagKizil/50 transition">
+                        <button onclick="startGameModal('Atasözleri ve Anlam Eşleştirmesi Oyunu', 'eslestirme.html')" class="w-full py-3 rounded-xl bg-amber-600/30 hover:bg-amber-600 text-white font-bold text-sm border border amber-500/40 transition">
                             Bu Modla Başla
                         </button>
                     </div>
                 </div>
+
+                <!-- MOD 4: Cümleyi Doğru Sıralama Oyunu -->
+                <div class="group relative card-glass gold-border rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-amberGold/15">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">4. Bölüm</span>
+                    </div>
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 border border-yellow-400/40 text-yellow-300 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-arrow-down-a-z"></i>
+                        </div>
+                        <h3 class="text-lg font-serif font-bold text-white mb-2 leading-snug">Cümleyi Doğru Sıralama Oyunu</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                            Meydana karışık saçılan kelimelere sırasıyla tıklayarak atasözünü kurallı ve anlamlı şekilde doğru sıraya diz.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
+                            <span><i class="fa-solid fa-list-ol text-yellow-300 mr-1.5"></i> 15 Atasözü</span>
+                            <span><i class="fa-solid fa-shield-halved text-yellow-300 mr-1.5"></i> Manas Ruhu</span>
+                        </div>
+                        <button onclick="startGameModal('Cümleyi Doğru Sıralama Oyunu', 'siralama.html')" class="w-full py-3 rounded-xl bg-yellow-500/20 hover:bg-yellow-500 text-yellow-200 hover:text-bozkir-950 font-bold text-sm border border-yellow-400/40 transition">
+                            Bu Modla Başla
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MOD 5: Resfebe ile Atasözü Bulma Oyunu -->
+                <div class="group relative card-glass border border-emerald-500/40 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/20">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">5. Bölüm</span>
+                    </div>
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-shapes"></i>
+                        </div>
+                        <h3 class="text-lg font-serif font-bold text-white mb-2 leading-snug">Resfebe ile Atasözü Bulma Oyunu</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                            Resim, simge ve harflerle şifrelenmiş resfebeleri çöz; bildikçe güneşler açsın, yanlışta şimşekler çaksın!
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
+                            <span><i class="fa-solid fa-image text-emerald-300 mr-1.5"></i> 10 Resfebe</span>
+                            <span><i class="fa-solid fa-water text-emerald-300 mr-1.5"></i> Ak Ana</span>
+                        </div>
+                        <button onclick="startGameModal('Resfebe ile Atasözü Bulma Oyunu', 'resfebe.html')" class="w-full py-3 rounded-xl bg-emerald-600/30 hover:bg-emerald-600 text-white font-bold text-sm border border-emerald-500/40 transition">
+                            Bu Modla Başla
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MOD 6: Büyük Karma Final Oyunu -->
+                <div class="group relative card-glass border border-rose-500/50 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-rose-500/25">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">6. Bölüm (Final)</span>
+                    </div>
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-rose-600/20 border border-rose-500/40 text-rose-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <h3 class="text-lg font-serif font-bold text-white mb-2 leading-snug">Büyük Karma Final Oyunu</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                            Tüm bölümlerden karışık gelen 20 soru, 30 saniye süre, doğru cevapta nazar boncukları ve yanlışta deprem sarsıntısı!
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-4 border-t border-slate-700/60 pt-4">
+                            <span><i class="fa-solid fa-stopwatch text-rose-400 mr-1.5"></i> 20 Soru (30s)</span>
+                            <span><i class="fa-solid fa-skull text-rose-400 mr-1.5"></i> Gulyabani</span>
+                        </div>
+                        <button onclick="startGameModal('Büyük Karma Final Oyunu', 'karma.html')" class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:brightness-110 text-white font-bold text-sm transition shadow-lg shadow-rose-950/40">
+                            Bu Modla Başla
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -396,15 +475,15 @@
             <div class="space-y-4 text-slate-300 text-sm leading-relaxed">
                 <div class="flex items-start space-x-3">
                     <span class="w-6 h-6 rounded-full bg-amberGold/20 text-amberGold flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
-                    <p>Kendine uygun olan oyun modunu seç (Kelime Tamamlama, Değer Eşleştirme veya Zamana Karşı).</p>
+                    <p>Kendine uygun olan oyun modunu seç (Kelime Tamamlama, Senaryo, Anlam Eşleme, Sıralama, Resfebe veya Büyük Final).</p>
                 </div>
                 <div class="flex items-start space-x-3">
                     <span class="w-6 h-6 rounded-full bg-turkuaz/20 text-turkuaz-light flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
-                    <p>Atasözünün taşıdığı derin hikmeti, otağ kültürümüzü ve ahlaki öğüdü düşünüp doğru seçeneği işaretle.</p>
+                    <p>Atasözünün taşıdığı derin hikmeti, kök değerlerimizi ve ahlaki öğütleri düşünüp doğru seçeneği işaretle.</p>
                 </div>
                 <div class="flex items-start space-x-3">
                     <span class="w-6 h-6 rounded-full bg-otagKizil/30 text-amber-200 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
-                    <p>Seri doğru cevaplarla Dede Korkut hikmet puanlarını katla, maarif listesinde en üst sıraya yerleş!</p>
+                    <p>Doğru cevaplarla puanları katla, kültürel jokerleri akıllıca kullan ve karneni tamamla!</p>
                 </div>
             </div>
             <button onclick="closeModal('howToPlayModal')" class="mt-8 w-full py-3 rounded-xl bg-gradient-to-r from-amberGold to-otagKizil text-bozkir-950 font-bold hover:brightness-110 transition">
@@ -472,9 +551,9 @@
             </div>
             <h3 id="selectedModeTitle" class="text-xl font-serif font-bold text-amberGold-light mb-2">Yolculuk Başlıyor</h3>
             <p class="text-slate-300 text-sm mb-6">Ataların hikmetini öğrenmek için adını gir!</p>
-            <input type="text" id="playerNameInput" placeholder="Yiğit / Öğrenci Adınız..." class="w-full px-4 py-3 rounded-xl bg-bozkir-950 border border-amberGold/40 text-white placeholder-slate-500 focus:outline-none focus:border-amberGold mb-4 text-center font-medium">
+            <input type="text" id="playerNameInput" placeholder="Öğrenci / Yarışmacı Adınız..." class="w-full px-4 py-3 rounded-xl bg-bozkir-950 border border-amberGold/40 text-white placeholder-slate-500 focus:outline-none focus:border-amberGold mb-4 text-center font-medium">
             <button onclick="launchGame()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amberGold via-amber-500 to-otagKizil text-bozkir-950 font-bold hover:brightness-110 active:scale-95 transition">
-                Otağa Gir ve Başla!
+                Oyuna Başla!
             </button>
         </div>
     </div>
@@ -495,6 +574,7 @@
     <script>
         let audioCtx = null;
         let soundEnabled = true;
+        let targetGameUrl = '';
 
         function getAudioContext() {
             if (!audioCtx) {
@@ -534,14 +614,6 @@
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
                     osc.start(now);
                     osc.stop(now + 0.28);
-                } else if (type === 'wrong') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.exponentialRampToValueAtTime(140, now + 0.15);
-                    gain.gain.setValueAtTime(0.1, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-                    osc.start(now);
-                    osc.stop(now + 0.18);
                 }
             } catch (e) {
                 console.error("Audio error: ", e);
@@ -617,7 +689,8 @@
             }, 300);
         }
 
-        function startGameModal(modeName) {
+        function startGameModal(modeName, fileUrl) {
+            targetGameUrl = fileUrl || '';
             document.getElementById('selectedModeTitle').innerText = modeName;
             openModal('startModal');
         }
@@ -636,11 +709,18 @@
                     <h3 class="text-xl font-serif font-bold text-white mb-2">Otağın Kapısı Açılıyor!</h3>
                     <p class="text-slate-300 text-sm mb-4">Hoş geldin, <strong class="text-amberGold-light">${name}</strong>!<br><strong>${mode}</strong> yükleniyor...</p>
                     <div class="w-full bg-bozkir-950 rounded-full h-2 mb-4 overflow-hidden border border-amberGold/20">
-                        <div class="bg-gradient-to-r from-amberGold to-otagKizil h-2 rounded-full animate-pulse" style="width: 75%"></div>
+                        <div class="bg-gradient-to-r from-amberGold to-otagKizil h-2 rounded-full animate-pulse" style="width: 85%"></div>
                     </div>
-                    <button onclick="closeModal('startModal'); location.reload();" class="text-xs text-slate-400 hover:text-white underline">Vazgeç ve Kapat</button>
                 </div>
             `;
+
+            setTimeout(() => {
+                if (targetGameUrl) {
+                    window.location.href = targetGameUrl;
+                } else {
+                    location.reload();
+                }
+            }, 900);
         }
     </script>
 </body>
